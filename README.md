@@ -5,6 +5,9 @@ A tool used to modify the memory of game Plants vs. Zombies 1.0.40 on Mac.
 You need a c++ 11 compiler and Qt5 library to build the project.  
 The release version was built using Apple LLVM 10.0.1 and Qt 5.12.3.
 
+## Run
+The Qt library is reqiured to launch the tool on Mac. Use macdeployqt to add reqiured framework to the package.
+
 ## Note
 To use task_for_pid(), root permission is required when launching this tool.  
 I used the STPrivilegedTask library to build a wrapper that askes for root permission to launch the tool in the release version. You can also launch the tool directly using the “sudo” command.  
