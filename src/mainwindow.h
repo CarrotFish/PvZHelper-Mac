@@ -239,6 +239,8 @@ signals:
     
     void NoYetiEscape(bool on);
     
+    void NoEnterHouse(bool on);
+    
     void AllZombiesXXX(int status);
     
     void SpawnNextWave();

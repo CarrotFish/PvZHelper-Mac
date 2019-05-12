@@ -2792,6 +2792,19 @@
        <string>下一波</string>
       </property>
      </widget>
+     <widget class="QCheckBox" name="NoEnterHouse">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>170</y>
+        <width>77</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>不进家门</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_7">
      <attribute name="title">

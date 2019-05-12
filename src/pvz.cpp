@@ -1637,6 +1637,15 @@ void PvZ::NoYetiEscape(bool on) {
     }
 }
 
+void PvZ::NoEnterHouse(bool on) {
+    if (isGameOn()) {
+        if (on)
+            WriteMemory(std::array<byte, 2>{0x90, 0x90}, 0xE7188);
+        else
+            WriteMemory(std::array<byte, 2>{0x74, 0x0D}, 0xE7188);
+    }
+}
+
 void PvZ::AllZombiesXXX(int status) {
     if (isGameOn()) {
         auto zombie_count_max = ReadMemory<uint32_t>(base, 0x780, 0x88);

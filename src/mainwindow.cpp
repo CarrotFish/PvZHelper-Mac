@@ -388,6 +388,7 @@ void MainWindow::ConnectWidgets() {
     connect(ui->SlowdownImmune, &QCheckBox::toggled, this, &MainWindow::SlowdownImmune);
     connect(ui->NoIceTrail, &QCheckBox::toggled, this, &MainWindow::NoIceTrail);
     connect(ui->NoYetiEscape, &QCheckBox::toggled, this, &MainWindow::NoYetiEscape);
+    connect(ui->NoEnterHouse, &QCheckBox::toggled, this, &MainWindow::NoEnterHouse);
     connect(ui->AllZombiesXXX, &QPushButton::clicked, this, [=]() {
         int status = ui->ZombieStatus->currentIndex();
         emit AllZombiesXXX(status);
@@ -785,6 +786,7 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::SlowdownImmune, pvz, &PvZ::SlowdownImmune);
     connect(this, &MainWindow::NoIceTrail, pvz, &PvZ::NoIceTrail);
     connect(this, &MainWindow::NoYetiEscape, pvz, &PvZ::NoYetiEscape);
+    connect(this, &MainWindow::NoEnterHouse, pvz, &PvZ::NoEnterHouse);
     connect(this, &MainWindow::AllZombiesXXX, pvz, &PvZ::AllZombiesXXX);
     connect(this, &MainWindow::SpawnNextWave, pvz, &PvZ::SpawnNextWave);
     
