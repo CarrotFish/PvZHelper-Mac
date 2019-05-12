@@ -361,6 +361,44 @@ void PvZ::ModifyMode(int mode) {
         WriteMemory<int>(mode, base, 0x7C0);
 }
 
+void PvZ::StartLevel(int mode) {
+    if (isGameOn()) {
+        if (CurGameUI() == 1) {
+            // code.asm_init();
+            // code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
+            // code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
+            // code.asm_call(0xB6C5C);
+            // code.asm_mov_dword_ptr_esp_add(0x8, 1);
+            // code.asm_mov_dword_ptr_esp_add(0x4, mode);
+            // code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
+            // code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
+            // code.asm_call(0xB79F4);
+            // code.asm_ret();
+            // code.asm_code_inject();
+            WriteMemory<int>(mode, 0xC8F08);
+            WriteMemory<byte>(0x80, 0xC8D4D);
+            WriteMemory<bool>(true, base, 0x26C, 0x7C, 0xC0);
+            while (CurGameUI() == 1) {
+                usleep(10000);
+            }
+            WriteMemory<byte>(0x8E, 0xC8D4D);
+            WriteMemory<int>(0, 0xC8F08);
+        } else if (CurGameUI() == 7) {
+            code.asm_init();
+            code.asm_mov_dword_ptr_esp_add(0x4, mode + 199);
+            code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
+            code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x26C);
+            code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x7C);
+            code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
+            WriteMemory(std::array<byte, 2>{0x90, 0x90}, 0x9A2F3);
+            code.asm_call(0x9A2B6);
+            code.asm_ret();
+            code.asm_code_inject();
+            WriteMemory(std::array<byte, 2>{0x78, 0x3E}, 0x9A2F3);
+        }
+    }
+}
+
 void PvZ::ModifyEndlessLevel(int level) {
     if (isGameOn() && (CurGameMode() == 60 || CurGameMode() == 70 || (CurGameMode() >= 11 && CurGameMode() <= 15)))
         WriteMemory<int>(level, base, 0x780, 0x154, 0x6C);

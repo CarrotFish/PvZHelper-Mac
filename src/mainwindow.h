@@ -61,6 +61,8 @@ signals:
     
     void ModifyMode(int mode);
     
+    void StartLevel(int mode);
+    
     void ModifyEndlessLevel(int level);
     
     void ModifyAdventureLevel(int level);

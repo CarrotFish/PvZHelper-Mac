@@ -107,6 +107,10 @@ void MainWindow::ConnectWidgets() {
         int mode = ui->Mode->text().toInt();
         emit ModifyMode(mode);
     });
+    connect(ui->StartLevel, &QPushButton::clicked, this, [=]() {
+        int mode = ui->Mode->text().toInt();
+        emit StartLevel(mode);
+    });
     connect(ui->ModifyEndlessLevel, &QPushButton::clicked, this, [=]() {
         int level = ui->EndlessLevel->text().toInt();
         emit ModifyEndlessLevel(level);
@@ -695,6 +699,7 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::KeepSunFalling, pvz, &PvZ::KeepSunFalling);
     
     connect(this, &MainWindow::ModifyMode, pvz, &PvZ::ModifyMode);
+    connect(this, &MainWindow::StartLevel, pvz, &PvZ::StartLevel);
     connect(this, &MainWindow::ModifyEndlessLevel, pvz, &PvZ::ModifyEndlessLevel);
     connect(this, &MainWindow::ModifyAdventureLevel, pvz, &PvZ::ModifyAdventureLevel);
     connect(this, &MainWindow::ModifyAdventureCompletionTimes, pvz, &PvZ::ModifyAdventureCompletionTimes);

@@ -787,10 +787,13 @@
        <set>Qt::ImhDigitsOnly</set>
       </property>
       <property name="text">
-       <string>0</string>
+       <string/>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>0~72</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_7">
@@ -876,7 +879,7 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>380</x>
+        <x>410</x>
         <y>15</y>
         <width>100</width>
         <height>30</height>
@@ -1136,6 +1139,22 @@
       </property>
       <property name="text">
        <string>解锁所有模式</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="StartLevel">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>15</y>
+        <width>100</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>进入关卡</string>
+      </property>
+      <property name="autoDefault">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>
