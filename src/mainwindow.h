@@ -107,6 +107,8 @@ signals:
     
     void AlwaysShovel(bool on);
     
+    void HideMenu(bool on);
+    
     void ModifyCardProperty(int CardID, int cost, int cooldowntime);
     
     void GetCardProperty(int CardID);

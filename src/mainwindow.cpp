@@ -155,6 +155,7 @@ void MainWindow::ConnectWidgets() {
     connect(ui->FreelyPlant, &QCheckBox::toggled, this, &MainWindow::FreelyPlant);
     connect(ui->PurplePlantAvailable, &QCheckBox::toggled, this, &MainWindow::PurplePlantAvailable);
     connect(ui->AlwaysShovel, &QCheckBox::toggled, this, &MainWindow::AlwaysShovel);
+    connect(ui->HideMenu, &QCheckBox::toggled, this, &MainWindow::HideMenu);
     connect(ui->ModifyCardProperty, &QPushButton::clicked, this, [=]() {
         int CardID = ui->CardID->currentIndex();
         int cost = ui->CardCost->text().toInt(), cooldowntime = ui->CardCooldownTime->text().toInt();
@@ -718,6 +719,7 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::FreelyPlant, pvz, &PvZ::FreelyPlant);
     connect(this, &MainWindow::PurplePlantAvailable, pvz, &PvZ::PurplePlantAvailable);
     connect(this, &MainWindow::AlwaysShovel, pvz, &PvZ::AlwaysShovel);
+    connect(this, &MainWindow::HideMenu, pvz, &PvZ::HideMenu);
     connect(this, &MainWindow::ModifyCardProperty, pvz, &PvZ::ModifyCardProperty);
     connect(this, &MainWindow::GetCardProperty, pvz, &PvZ::GetCardProperty);
     connect(this, &MainWindow::ModifyGameScene, pvz, &PvZ::ModifyGameScene);

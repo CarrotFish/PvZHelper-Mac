@@ -367,8 +367,11 @@ void PvZ::ModifyEndlessLevel(int level) {
 }
 
 void PvZ::ModifyAdventureLevel(int level) {
-    if (isGameOn())
+    if (isGameOn()) {
         WriteMemory<int>(level, base, 0x7F4, 0x34);
+        if ((CurGameUI() == 2) || (CurGameUI() == 3))
+            WriteMemory<int>(level, base, 0x780, 0x5544);
+    }
 }
 
 void PvZ::ModifyAdventureCompletionTimes(int times) {
@@ -637,6 +640,15 @@ void PvZ::AlwaysShovel(bool on) {
             WriteMemory(std::array<byte, 7>{0xC7, 0x40, 0x30, 0x00, 0x00, 0x00, 0x00}, 0x12FA0);
             WriteMemory<int>(0, base, 0x780, 0x12C, 0x30);
         }
+    }
+}
+
+void PvZ::HideMenu(bool on) {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
+        if (on)
+            WriteMemory<int>(900, base, 0x780, 0x13C, 0xC);
+        else
+            WriteMemory<int>(681, base, 0x780, 0x13C, 0xC);
     }
 }
 
@@ -1682,6 +1694,7 @@ void PvZ::SpawnNextWave() {
     if (isGameOn() && CurGameUI() == 3)
         WriteMemory<int>(1, base, 0x780, 0x5590);
 }
+
 //Spawn
 
 // generate type from seed
@@ -1691,7 +1704,8 @@ void PvZ::UpdateZombiesType() {
     code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
     code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x154);
     code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
-    code.asm_call(0xA8552);
+    // code.asm_call(0xA8552); Endless only
+    code.asm_call(0xA883C);
     code.asm_ret();
     code.asm_code_inject();
 }
