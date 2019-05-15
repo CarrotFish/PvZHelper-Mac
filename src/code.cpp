@@ -222,13 +222,9 @@ void Code::asm_code_inject() {
     uint32_t ThreadState = _memory.Allocate(40, VM_PROT_READ | VM_PROT_WRITE);
     _memory.Write<int>(0x0, ThreadState);
     _memory.Write<int>(0x0, ThreadState + 4);
-    
-#ifdef _DEBUG
     qDebug() << hex << remoteCode;
     qDebug() << hex << remoteStack;
     qDebug() << hex << ThreadState;
-#endif
-    
     uint32_t offset = length - 13 - 22;
     std::array<unsigned char, 23> ar = {0xA1, 0x00, 0x00, 0x00, 0x00, 0x84, 0xC0, 0x0F, 0x85, 0x00, 0x00, 0x00, 0x00,
                                         0xC7, 0x05, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
