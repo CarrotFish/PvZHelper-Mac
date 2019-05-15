@@ -1740,10 +1740,11 @@ void PvZ::UpdateZombiesType() {
     code.asm_init();
     code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
     code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
-    code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x154);
+    // code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x154);
     code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
     // code.asm_call(0xA8552); Endless only
-    code.asm_call(0xA883C);
+    // code.asm_call(0xA883C);
+    code.asm_call(0x14BEA);
     code.asm_ret();
     code.asm_code_inject();
 }
