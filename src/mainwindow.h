@@ -344,6 +344,8 @@ public slots:
     
     void ShowSeed(uint32_t seed);
     
+    void OpenUserdataFolder(QString DataDir);
+    
     void SelectPAKFile();
     
     void SelectPAKFolder();

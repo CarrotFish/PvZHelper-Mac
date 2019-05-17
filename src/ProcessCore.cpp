@@ -57,7 +57,11 @@ int ProcessCore::Open(int pid)
     kern_return_t kret = task_for_pid(mach_task_self(), _pid, &_pmach_port);
 	if(kret != KERN_SUCCESS)
     {
+	   
+#ifndef NDEBUG
        printf("task_for_pid() error, try running as sudo!\n");
+#endif
+       
        MACH_CHECK_ERROR(kret);
        return 0;
     }

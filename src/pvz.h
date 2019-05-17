@@ -47,6 +47,8 @@ signals:
     void GigaWaves(std::array<bool, 20> &giga_waves);
     
     void Seed(uint32_t seed);
+    
+    void UserdataFolder(QString DataDir);
 
 public:
     PvZ(Ui::MainWindow *ui, MainWindow *MainWindow);
@@ -333,7 +335,7 @@ public slots:
     
     void SetDebugMode(int mode);
     
-    void OpenUserdata();
+    void GetUserdataFolder();
     
     void SetSeed(uint32_t seed);
     

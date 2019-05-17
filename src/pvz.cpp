@@ -2,7 +2,6 @@
 #include "mainwindow.h"
 #include <ctime>
 #include <random>
-#include <QDesktopServices>
 #include <QDebug>
 
 typedef uint8_t byte;
@@ -45,6 +44,8 @@ PvZ::PvZ(Ui::MainWindow *ui, MainWindow *MainWindow) : GameProc(new xnu_proc), u
     connect(this, &PvZ::SpawnList, window, &MainWindow::UpdateSpawnTable);
     connect(this, &PvZ::GigaWaves, window, &MainWindow::UpdateGigaWaves);
     connect(this, &PvZ::Seed, window, &MainWindow::ShowSeed);
+    
+    connect(this, &PvZ::UserdataFolder, window, &MainWindow::OpenUserdataFolder);
 }
 
 PvZ::~PvZ() {
@@ -1939,7 +1940,6 @@ void PvZ::ExtremeSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limi
 void PvZ::RestoreSpawn() {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
         UpdateZombiesType();
-        UpdateZombiesList();
         if (CurGameUI() == 2)
             UpdateZombiesPreview();
         GetSpawnList();
@@ -2051,13 +2051,13 @@ void PvZ::SetDebugMode(int mode) {
     }
 }
 
-void PvZ::OpenUserdata() {
+void PvZ::GetUserdataFolder() {
     if (isGameOn()) {
         QString DataDir = GameProc->memory().ReadString(ReadMemory<uint32_t>(0x3B61A4));
         // QString Cmd = "open " + DataDir.replace(" ", "\\ ") + "userdata";
         // system(Cmd.toStdString().data());
-        DataDir = "file:" + DataDir + "userdata";
-        QDesktopServices::openUrl(QUrl(DataDir, QUrl::TolerantMode));
+        DataDir += "userdata";
+        emit UserdataFolder(DataDir);
     }
 }
 

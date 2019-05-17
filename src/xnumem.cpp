@@ -46,8 +46,12 @@ void mach_check_error (kern_return_t ret, const char *file, unsigned int line, c
     if (func == nullptr) {
         func = "[UNKNOWN]";
     }
+    
+#ifndef NDEBUG
     errx(1,"fatal Mach error on line %u of \"%s\" : %s\n",
          line, file, mach_error_string (ret));
+#endif
+
 }
 
 xnu_proc::xnu_proc() : _core(), _memory(this), _modules(*this), _code(*this)

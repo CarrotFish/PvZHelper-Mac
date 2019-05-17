@@ -6,6 +6,7 @@
 #include <QHeaderView>
 #include <QTimer>
 #include <QMenuBar>
+#include <QDesktopServices>
 #include <QFileDialog>
 #include <QDateTime>
 #include <QStandardPaths>
@@ -208,7 +209,7 @@ void MainWindow::ConnectWidgets() {
                 type = ui->ZombieType->currentIndex();
         emit SetZombie(row, column, type);
     });
-    connect(ui->SpawnZombie, &QPushButton::clicked, this, [=](){
+    connect(ui->SpawnZombie, &QPushButton::clicked, this, [=]() {
         int type = ui->ZombieType->currentIndex(), count = ui->ZombieCount->text().toInt();
         emit SpawnZombie(type, count);
     });
@@ -669,7 +670,7 @@ void MainWindow::ConnectWidgets() {
         }
         emit PackPAK(FolderPath.filePath(), PAKPath.filePath());
     });
-    connect(ui->SetMusic, &QPushButton::clicked, this, [=](){
+    connect(ui->SetMusic, &QPushButton::clicked, this, [=]() {
         int type = ui->MusicType->currentIndex() + 1;
         emit SetMusic(type);
     });
@@ -745,8 +746,8 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::LawnMowersDisappear, pvz, &PvZ::LawnMowersDisappear);
     connect(this, &MainWindow::ClearAllPlants, pvz, &PvZ::ClearAllPlants);
     connect(this, &MainWindow::ClearAllZombies, pvz, &PvZ::ClearAllZombies);
-    connect(this, &MainWindow::ClearAllItems,pvz, &PvZ::ClearAllItems);
-    connect(this, &MainWindow::ClearAllGridItems,pvz, &PvZ::ClearAllGridItems);
+    connect(this, &MainWindow::ClearAllItems, pvz, &PvZ::ClearAllItems);
+    connect(this, &MainWindow::ClearAllGridItems, pvz, &PvZ::ClearAllGridItems);
     
     connect(this, &MainWindow::ModifyPlantHP, pvz, &PvZ::ModifyPlantHP);
     connect(this, &MainWindow::GetPlantHP, pvz, &PvZ::GetPlantHP);
@@ -814,7 +815,7 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::GardenPlantLeft, pvz, &PvZ::GardenPlantLeft);
     
     connect(this, &MainWindow::SetDebugMode, pvz, &PvZ::SetDebugMode);
-    connect(this, &MainWindow::OpenUserdata, pvz, &PvZ::OpenUserdata);
+    connect(this, &MainWindow::OpenUserdata, pvz, &PvZ::GetUserdataFolder);
     connect(this, &MainWindow::SetSeed, pvz, &PvZ::SetSeed);
     connect(this, &MainWindow::GetSeed, pvz, &PvZ::GetSeed);
     connect(this, &MainWindow::GetRandomSeed, pvz, &PvZ::GetRandomSeed);
@@ -1285,6 +1286,11 @@ void MainWindow::UpdateGigaWaves(std::array<bool, 20> &giga_waves) {
 
 void MainWindow::ShowSeed(uint32_t seed) {
     ui->SpawnSeed->setText(QString("%1").arg(seed, 8, 16, QLatin1Char('0')).toUpper());
+}
+
+void MainWindow::OpenUserdataFolder(QString DataDir) {
+    DataDir = "file:" + DataDir;
+    QDesktopServices::openUrl(QUrl(DataDir, QUrl::TolerantMode));
 }
 
 void MainWindow::SelectPAKFile() {
