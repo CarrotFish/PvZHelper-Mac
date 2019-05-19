@@ -45,7 +45,7 @@ void MainWindow::ConnectWidgets() {
     ui->ResourceType->setCurrentIndex(1);
     ui->GameScene->addItems(list->MapList);
     ui->PlantHPType->addItems(list->PlantHPList);
-    ui->PlantAttackIntervalType->addItems(list->PlantAttackIntervalList);
+    ui->PlantAttackIntervalType->addItems(list->PlantsList);
     ui->ProjectileType->addItems(list->ProjectileList);
     ui->ZombieHPType->addItems(list->ZombieHPList);
     ui->SpawnType->addItems(list->ZombiesList);
@@ -182,17 +182,23 @@ void MainWindow::ConnectWidgets() {
         int row = ui->Row->text().toInt() - 1, type = ui->RowType->currentIndex();
         emit ModifyRowType(row, type);
     });
-    connect(ui->PutLadder, &QPushButton::clicked, this, [=]() {
-        int row = ui->Row->text().toInt() - 1, column = ui->Column->text().toInt() - 1;
-        emit PutLadder(row, column);
-    });
-    connect(ui->PutGrave, &QPushButton::clicked, this, [=]() {
-        int row = ui->Row->text().toInt() - 1, column = ui->Column->text().toInt() - 1;
-        emit PutGrave(row, column);
-    });
-    connect(ui->PutRake, &QPushButton::clicked, this, [=]() {
-        int row = ui->Row->text().toInt() - 1, column = ui->Column->text().toInt() - 1;
-        emit PutRake(row, column);
+    connect(ui->PutItem, &QPushButton::clicked, this, [=]() {
+        int type = ui->ItemType->currentIndex(), row = ui->Row->text().toInt() - 1, column =
+                ui->Column->text().toInt() - 1;
+        switch (type) {
+            case 0:
+                emit PutLadder(row, column);
+                break;
+            case 1:
+                emit PutGrave(row, column);
+                break;
+            case 2:
+                emit PutRake(row, column);
+                break;
+            default:
+                emit PutCoin(type - 2, row, column);
+                break;
+        }
     });
     connect(ui->PumpkinLadder, &QPushButton::clicked, this, [=]() {
         bool imitater_only = ui->ImitaterOnly->isChecked();
@@ -686,8 +692,6 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::LockMoney, pvz, &PvZ::LockMoney);
     connect(this, &MainWindow::ModifySunLimit, pvz, &PvZ::ModifySunLimit);
     connect(this, &MainWindow::ModifyMoneyLimit, pvz, &PvZ::ModifyMoneyLimit);
-    connect(this, &MainWindow::ModifySun, pvz, &PvZ::ModifySun);
-    connect(this, &MainWindow::ModifyMoney, pvz, &PvZ::ModifyMoney);
     connect(this, &MainWindow::GetSliverSunflower, pvz, &PvZ::GetSliverSunflower);
     connect(this, &MainWindow::GetGoldenSunflower, pvz, &PvZ::GetGoldenSunflower);
     connect(this, &MainWindow::GetAllItems, pvz, &PvZ::GetAllItems);
@@ -734,6 +738,7 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::PutLadder, pvz, &PvZ::PutLadder);
     connect(this, &MainWindow::PutGrave, pvz, &PvZ::PutGrave);
     connect(this, &MainWindow::PutRake, pvz, &PvZ::PutRake);
+    connect(this, &MainWindow::PutCoin, pvz, &PvZ::PutCoin);
     connect(this, &MainWindow::PumpkinLadder, pvz, &PvZ::PumpkinLadder);
     connect(this, &MainWindow::SetPlant, pvz, &PvZ::SetPlant);
     connect(this, &MainWindow::SetZombie, pvz, &PvZ::SetZombie);

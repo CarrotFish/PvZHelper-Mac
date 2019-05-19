@@ -69,6 +69,8 @@ public:
     void asm_put_grave(int row, int column);
     
     void asm_put_rake(int row, int column);
+    
+    void asm_put_coin(int row, int column, int type, int scene);
 
 protected:
     unsigned char *code;

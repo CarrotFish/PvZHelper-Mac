@@ -171,6 +171,8 @@ public slots:
     
     void PutRake(int row, int column);
     
+    void PutCoin(int type, int row, int column);
+    
     void PumpkinLadder(bool imitater_only);
     
     void SetPlant(int row, int column, int type, bool imitater);
@@ -378,6 +380,8 @@ private:
     int RefreshCountdown();
     
     int HugeWaveCountdown();
+    
+    int CurScene();
     
     int CurRowCount();
     

@@ -116,6 +116,10 @@ inline int PvZ::HugeWaveCountdown() {
     else return 0;
 }
 
+inline int PvZ::CurScene() {
+    return ReadMemory<int>(base, 0x780, 0x5540);
+}
+
 inline int PvZ::CurRowCount() {
     auto scene = ReadMemory<int>(base, 0x780, 0x5540);
     return (scene == 2 || scene == 3) ? 6 : 5;
@@ -944,6 +948,30 @@ void PvZ::PutRake(int row, int column) {
     }
 }
 
+void PvZ::PutCoin(int type, int row, int column) {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3))
+    {
+        int scene = CurScene();
+        int row_count = CurRowCount();
+        int col_count = 9;
+        code.asm_init();
+        if (row == -1 && column == -1)
+            for (int r = 0; r < row_count; r++)
+                for (int c = 0; c < col_count; c++)
+                    code.asm_put_coin(r, c, type, scene);
+        else if (row != -1 && column == -1)
+            for (int c = 0; c < col_count; c++)
+                code.asm_put_coin(row, c, type, scene);
+        else if (row == -1 && column != -1)
+            for (int r = 0; r < row_count; r++)
+                code.asm_put_coin(r, column, type, scene);
+        else
+            code.asm_put_coin(row, column, type, scene);
+        code.asm_ret();
+        code.asm_code_inject();
+    }
+}
+
 void PvZ::PumpkinLadder(bool imitater_only) {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
         auto grid_item_count_max = ReadMemory<uint32_t>(base, 0x780, 0x114);
@@ -1234,15 +1262,13 @@ void PvZ::GetPlantHP(int type) {
 
 void PvZ::ModifyPlantAttackInterval(int type, int value) {
     if (isGameOn()) {
-        int PlantID[18] = {0, 5, 7, 8, 10, 13, 18, 24, 26, 28, 29, 32, 34, 39, 40, 42, 43, 44};
-        WriteMemory<int>(value, 0x35CFDC + PlantID[type] * 0x24);
+        WriteMemory<int>(value, 0x35CFDC + type * 0x24);
     }
 }
 
 void PvZ::GetPlantAttackInterval(int type) {
     if (isGameOn(false)) {
-        int PlantID[18] = {0, 5, 7, 8, 10, 13, 18, 24, 26, 28, 29, 32, 34, 39, 40, 42, 43, 44};
-        int value = ReadMemory<int>(0x35CFDC + PlantID[type] * 0x24);
+        int value = ReadMemory<int>(0x35CFDC + type * 0x24);
         emit PlantAttackInterval(value);
     }
 }
