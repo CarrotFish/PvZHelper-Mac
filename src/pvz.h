@@ -5,6 +5,8 @@
 #include <array>
 #include "xnumem.h"
 
+typedef uint8_t byte;
+
 namespace Ui {
     class MainWindow;
 }
@@ -47,6 +49,8 @@ signals:
     void GigaWaves(std::array<bool, 20> &giga_waves);
     
     void Seed(uint32_t seed);
+    
+    void UserdataFolder(QString DataDir);
 
 public:
     PvZ(Ui::MainWindow *ui, MainWindow *MainWindow);
@@ -99,6 +103,8 @@ public slots:
     
     void ModifyMode(int mode);
     
+    void StartLevel(int mode);
+    
     void ModifyEndlessLevel(int level);
     
     void ModifyAdventureLevel(int level);
@@ -147,6 +153,8 @@ public slots:
     
     void AlwaysShovel(bool on);
     
+    void HideMenu(bool on);
+    
     void ModifyCardProperty(int CardID, int cost, int cooldowntime);
     
     void GetCardProperty(int CardID);
@@ -164,6 +172,8 @@ public slots:
     void PutGrave(int row, int column);
     
     void PutRake(int row, int column);
+    
+    void PutCoin(int type, int row, int column);
     
     void PumpkinLadder(bool imitater_only);
     
@@ -285,6 +295,8 @@ public slots:
     
     void NoYetiEscape(bool on);
     
+    void NoEnterHouse(bool on);
+    
     void AllZombiesXXX(int status);
     
     void SpawnNextWave();
@@ -327,7 +339,7 @@ public slots:
     
     void SetDebugMode(int mode);
     
-    void OpenUserdata();
+    void GetUserdataFolder();
     
     void SetSeed(uint32_t seed);
     
@@ -355,6 +367,9 @@ private:
     template<typename T, typename... Args>
     void WriteMemory(T value, Args... address);
     
+    template<size_t original_size, size_t size>
+    void CodeInject(bool on, uint32_t address, std::array<byte, size> &ar);
+    
     int CurGameMode();
     
     int CurGameUI();
@@ -370,6 +385,8 @@ private:
     int RefreshCountdown();
     
     int HugeWaveCountdown();
+    
+    int CurScene();
     
     int CurRowCount();
     

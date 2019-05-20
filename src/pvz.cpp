@@ -2,10 +2,7 @@
 #include "mainwindow.h"
 #include <ctime>
 #include <random>
-#include <QDesktopServices>
 #include <QDebug>
-
-typedef uint8_t byte;
 
 template<typename T, typename... Args>
 inline T PvZ::ReadMemory(Args... address) {
@@ -20,6 +17,40 @@ inline std::array<T, size> PvZ::ReadMemory(Args... address) {
 template<typename T, typename... Args>
 inline void PvZ::WriteMemory(T value, Args... address) {
     memory.WriteMem<T>(value, {static_cast<uintptr_t>(address)...});
+}
+
+template<size_t original_size, size_t size>
+void PvZ::CodeInject(bool on, uint32_t address, std::array<byte, size> &ar) {
+    uint32_t injected_code = 0;
+    const int code_size = size + original_size + 5;
+    if (on) {
+        injected_code = (uint32_t) memory.Allocate(code_size, VM_PROT_ALL);
+        if (injected_code) {
+            uint32_t offset = injected_code - address - 5, offset2 =
+                    address + original_size - injected_code - code_size;
+            
+            std::array<byte, original_size> ar1{};
+            ar1.fill(0x90);
+            ar1[0] = 0xE9;
+            memcpy(&ar1[1], &offset, 4);
+            
+            auto ar2 = ReadMemory<byte, original_size>(address);
+            std::array<byte, code_size> ar3{};
+            memcpy(&ar3[0], &ar[0], size);
+            memcpy(&ar3[size], &ar2[0], original_size);
+            ar3[code_size - 5] = 0xE9;
+            memcpy(&ar3[code_size - 4], &offset2, 4);
+            
+            WriteMemory(ar3, injected_code);
+            WriteMemory(ar1, address);
+        }
+    } else if (ReadMemory<byte>(address) == 0xE9) {
+        auto offset = ReadMemory<uint32_t>(address + 1);
+        injected_code = offset + address + 5;
+        auto ar1 = ReadMemory<byte, original_size>(injected_code + size);
+        WriteMemory(ar1, address);
+        memory.Free(injected_code, code_size);
+    }
 }
 
 PvZ::PvZ(Ui::MainWindow *ui, MainWindow *MainWindow) : GameProc(new xnu_proc), ui(ui), window(MainWindow),
@@ -45,6 +76,8 @@ PvZ::PvZ(Ui::MainWindow *ui, MainWindow *MainWindow) : GameProc(new xnu_proc), u
     connect(this, &PvZ::SpawnList, window, &MainWindow::UpdateSpawnTable);
     connect(this, &PvZ::GigaWaves, window, &MainWindow::UpdateGigaWaves);
     connect(this, &PvZ::Seed, window, &MainWindow::ShowSeed);
+    
+    connect(this, &PvZ::UserdataFolder, window, &MainWindow::OpenUserdataFolder);
 }
 
 PvZ::~PvZ() {
@@ -113,6 +146,10 @@ inline int PvZ::HugeWaveCountdown() {
     if (CurGameUI() == 2 || CurGameUI() == 3)
         return ReadMemory<int>(base, 0x780, 0x5598);
     else return 0;
+}
+
+inline int PvZ::CurScene() {
+    return ReadMemory<int>(base, 0x780, 0x5540);
 }
 
 inline int PvZ::CurRowCount() {
@@ -303,36 +340,17 @@ void PvZ::GetResourceValue(int type) {
 
 void PvZ::AutoCollect(bool on) {
     if (isGameOn()) {
-        if (on)
-            WriteMemory<byte>(0xEB, 0x9FF80);
-        else
-            WriteMemory<byte>(0x74, 0x9FF80);
+        std::array<byte, 19> ar = {0x8B, 0x45, 0x08, 0x89, 0x04, 0x24, 0xE8, 0x02, 0x00, 0x00, 0x00,
+                                   0xEB, 0x06, 0x68, 0x32, 0xBC, 0x09, 0x00, 0xC3};
+        CodeInject<6>(on, 0x9FF82, ar);
     }
 }
 
 void PvZ::NoMoneyDrops(bool on) {
     if (isGameOn()) {
-        static uint32_t InjectedCode = 0;
-        if (on) {
-            InjectedCode = (uint32_t) memory.Allocate(34 * sizeof(byte), VM_PROT_ALL);
-            if (InjectedCode) {
-                uint32_t offset = InjectedCode - 0x1C5A5 - 5, offset2 = 0x1C5AC - InjectedCode - 34;
-                std::array<byte, 7> ar = {0xE9, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90};
-                memcpy(&ar[1], &offset, 4 * sizeof(byte));
-                std::array<byte, 34> ar2 = {0x8B, 0x40, 0x58, 0x83, 0xF8, 0x03, 0x7F, 0x09, 0x8B, 0x45, 0x0C,
-                                            0x8B, 0x00, 0xC6, 0x40, 0x38, 0x01, 0x8B, 0x45, 0x0C, 0x8B, 0x00,
-                                            0x0F, 0xB6, 0x40, 0x38, 0x83, 0xF0, 0x01, 0xE9, 0x00, 0x00, 0x00,
-                                            0x00};
-                memcpy(&ar2[30], &offset2, 4 * sizeof(byte));
-                WriteMemory(ar2, InjectedCode);
-                WriteMemory(ar, 0x1C5A5);
-            }
-        } else {
-            if (InjectedCode) {
-                WriteMemory(std::array<byte, 7>{0x0F, 0xB6, 0x40, 0x38, 0x83, 0xF0, 0x01}, 0x1C5A5);
-                memory.Free(InjectedCode, 34 * sizeof(byte));
-            }
-        }
+        std::array<byte, 22> ar = {0x8B, 0x40, 0x58, 0x83, 0xF8, 0x03, 0x7F, 0x09, 0x8B, 0x45, 0x0C,
+                                   0x8B, 0x00, 0xC6, 0x40, 0x38, 0x01, 0x8B, 0x45, 0x0C, 0x8B, 0x00};
+        CodeInject<7>(on, 0x1C5A5, ar);
     }
 }
 
@@ -361,14 +379,55 @@ void PvZ::ModifyMode(int mode) {
         WriteMemory<int>(mode, base, 0x7C0);
 }
 
+void PvZ::StartLevel(int mode) {
+    if (isGameOn()) {
+        if (CurGameUI() == 1) {
+            // code.asm_init();
+            // code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
+            // code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
+            // code.asm_call(0xB6C5C);
+            // code.asm_mov_dword_ptr_esp_add(0x8, 1);
+            // code.asm_mov_dword_ptr_esp_add(0x4, mode);
+            // code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
+            // code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
+            // code.asm_call(0xB79F4);
+            // code.asm_ret();
+            // code.asm_code_inject();
+            WriteMemory<int>(mode, 0xC8F08);
+            WriteMemory<byte>(0x80, 0xC8D4D);
+            WriteMemory<bool>(true, base, 0x26C, 0x7C, 0xC0);
+            while (CurGameUI() == 1) {
+                usleep(10000);
+            }
+            WriteMemory<byte>(0x8E, 0xC8D4D);
+            WriteMemory<int>(0, 0xC8F08);
+        } else if (CurGameUI() == 7) {
+            code.asm_init();
+            code.asm_mov_dword_ptr_esp_add(0x4, mode + 199);
+            code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
+            code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x26C);
+            code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x7C);
+            code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
+            WriteMemory(std::array<byte, 2>{0x90, 0x90}, 0x9A2F3);
+            code.asm_call(0x9A2B6);
+            code.asm_ret();
+            code.asm_code_inject();
+            WriteMemory(std::array<byte, 2>{0x78, 0x3E}, 0x9A2F3);
+        }
+    }
+}
+
 void PvZ::ModifyEndlessLevel(int level) {
     if (isGameOn() && (CurGameMode() == 60 || CurGameMode() == 70 || (CurGameMode() >= 11 && CurGameMode() <= 15)))
         WriteMemory<int>(level, base, 0x780, 0x154, 0x6C);
 }
 
 void PvZ::ModifyAdventureLevel(int level) {
-    if (isGameOn())
+    if (isGameOn()) {
         WriteMemory<int>(level, base, 0x7F4, 0x34);
+        if ((CurGameUI() == 2) || (CurGameUI() == 3))
+            WriteMemory<int>(level, base, 0x780, 0x5544);
+    }
 }
 
 void PvZ::ModifyAdventureCompletionTimes(int times) {
@@ -640,6 +699,15 @@ void PvZ::AlwaysShovel(bool on) {
     }
 }
 
+void PvZ::HideMenu(bool on) {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
+        if (on)
+            WriteMemory<int>(900, base, 0x780, 0x13C, 0xC);
+        else
+            WriteMemory<int>(681, base, 0x780, 0x13C, 0xC);
+    }
+}
+
 void PvZ::ModifyCardProperty(int CardID, int cost, int cooldowntime) {
     if (isGameOn()) {
         uint32_t CostAddress = 0;
@@ -866,6 +934,29 @@ void PvZ::PutRake(int row, int column) {
         WriteMemory(std::array<byte, 3>{0x84, 0x93, 0x02}, 0x26DC7);
         WriteMemory<byte>(0xE0, 0x26F48);
         WriteMemory<byte>(0xE8, 0x26F51);
+    }
+}
+
+void PvZ::PutCoin(int type, int row, int column) {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
+        int scene = CurScene();
+        int row_count = CurRowCount();
+        int col_count = 9;
+        code.asm_init();
+        if (row == -1 && column == -1)
+            for (int r = 0; r < row_count; r++)
+                for (int c = 0; c < col_count; c++)
+                    code.asm_put_coin(r, c, type, scene);
+        else if (row != -1 && column == -1)
+            for (int c = 0; c < col_count; c++)
+                code.asm_put_coin(row, c, type, scene);
+        else if (row == -1 && column != -1)
+            for (int r = 0; r < row_count; r++)
+                code.asm_put_coin(r, column, type, scene);
+        else
+            code.asm_put_coin(row, column, type, scene);
+        code.asm_ret();
+        code.asm_code_inject();
     }
 }
 
@@ -1159,15 +1250,13 @@ void PvZ::GetPlantHP(int type) {
 
 void PvZ::ModifyPlantAttackInterval(int type, int value) {
     if (isGameOn()) {
-        int PlantID[18] = {0, 5, 7, 8, 10, 13, 18, 24, 26, 28, 29, 32, 34, 39, 40, 42, 43, 44};
-        WriteMemory<int>(value, 0x35CFDC + PlantID[type] * 0x24);
+        WriteMemory<int>(value, 0x35CFDC + type * 0x24);
     }
 }
 
 void PvZ::GetPlantAttackInterval(int type) {
     if (isGameOn(false)) {
-        int PlantID[18] = {0, 5, 7, 8, 10, 13, 18, 24, 26, 28, 29, 32, 34, 39, 40, 42, 43, 44};
-        int value = ReadMemory<int>(0x35CFDC + PlantID[type] * 0x24);
+        int value = ReadMemory<int>(0x35CFDC + type * 0x24);
         emit PlantAttackInterval(value);
     }
 }
@@ -1637,6 +1726,15 @@ void PvZ::NoYetiEscape(bool on) {
     }
 }
 
+void PvZ::NoEnterHouse(bool on) {
+    if (isGameOn()) {
+        if (on)
+            WriteMemory(std::array<byte, 2>{0x90, 0x90}, 0xE7188);
+        else
+            WriteMemory(std::array<byte, 2>{0x74, 0x0D}, 0xE7188);
+    }
+}
+
 void PvZ::AllZombiesXXX(int status) {
     if (isGameOn()) {
         auto zombie_count_max = ReadMemory<uint32_t>(base, 0x780, 0x88);
@@ -1673,6 +1771,7 @@ void PvZ::SpawnNextWave() {
     if (isGameOn() && CurGameUI() == 3)
         WriteMemory<int>(1, base, 0x780, 0x5590);
 }
+
 //Spawn
 
 // generate type from seed
@@ -1680,9 +1779,11 @@ void PvZ::UpdateZombiesType() {
     code.asm_init();
     code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
     code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
-    code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x154);
+    // code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x154);
     code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
-    code.asm_call(0xA8552);
+    // code.asm_call(0xA8552); Endless only
+    // code.asm_call(0xA883C);
+    code.asm_call(0x14BEA);
     code.asm_ret();
     code.asm_code_inject();
 }
@@ -1876,10 +1977,7 @@ void PvZ::ExtremeSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limi
 
 void PvZ::RestoreSpawn() {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
-        std::array<bool, 33> zombies = {false};
-        WriteMemory(zombies, base, 0x780, 0x54C8);
         UpdateZombiesType();
-        UpdateZombiesList();
         if (CurGameUI() == 2)
             UpdateZombiesPreview();
         GetSpawnList();
@@ -1991,13 +2089,13 @@ void PvZ::SetDebugMode(int mode) {
     }
 }
 
-void PvZ::OpenUserdata() {
+void PvZ::GetUserdataFolder() {
     if (isGameOn()) {
         QString DataDir = GameProc->memory().ReadString(ReadMemory<uint32_t>(0x3B61A4));
         // QString Cmd = "open " + DataDir.replace(" ", "\\ ") + "userdata";
         // system(Cmd.toStdString().data());
-        DataDir = "file:" + DataDir + "userdata";
-        QDesktopServices::openUrl(QUrl(DataDir, QUrl::TolerantMode));
+        DataDir += "userdata";
+        emit UserdataFolder(DataDir);
     }
 }
 

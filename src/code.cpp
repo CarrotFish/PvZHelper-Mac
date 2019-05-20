@@ -1,7 +1,5 @@
 #include "code.h"
 #include "xnumem.h"
-#include <mach/thread_act.h>
-#include <mach/thread_status.h>
 #include <array>
 #include <QDebug>
 
@@ -222,9 +220,13 @@ void Code::asm_code_inject() {
     uint32_t ThreadState = _memory.Allocate(40, VM_PROT_READ | VM_PROT_WRITE);
     _memory.Write<int>(0x0, ThreadState);
     _memory.Write<int>(0x0, ThreadState + 4);
+
+#ifndef NDEBUG
     qDebug() << hex << remoteCode;
     qDebug() << hex << remoteStack;
     qDebug() << hex << ThreadState;
+#endif
+    
     uint32_t offset = length - 13 - 22;
     std::array<unsigned char, 23> ar = {0xA1, 0x00, 0x00, 0x00, 0x00, 0x84, 0xC0, 0x0F, 0x85, 0x00, 0x00, 0x00, 0x00,
                                         0xC7, 0x05, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
@@ -255,6 +257,9 @@ void Code::asm_code_inject() {
     _memory.Write(ar3, addr);                //replace the original code
     
     for (;;) {
+        int temp;
+        if (_memory.Read(0x35EE64, 4, &temp) != KERN_SUCCESS)
+            break;
         if (_memory.Read<int>(ThreadState + 4) == 1) {  //check flag(2)
             std::array<unsigned char, 6> ar4 = {0x8B, 0x81, 0x88, 0x00, 0x00, 0x00};//, 0x00, 0x00, 0x00};
             _memory.Write(ar4, addr);        //restore the original code
@@ -272,9 +277,8 @@ void Code::asm_set_plant(int row, int column, int type, bool imitater, bool iz_s
     if (imitater && !iz_style) {
         asm_mov_dword_ptr_esp_add(0x10, type);
         type = 48;
-    } else {
+    } else
         asm_mov_dword_ptr_esp_add(0x10, -1);
-    }
     asm_mov_dword_ptr_esp_add(0xC, type);
     asm_mov_dword_ptr_esp_add(0x8, row);
     asm_mov_dword_ptr_esp_add(0x4, column);
@@ -283,7 +287,7 @@ void Code::asm_set_plant(int row, int column, int type, bool imitater, bool iz_s
     asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
     asm_call(0x2A0C2);
     
-    if(iz_style){
+    if (iz_style) {
         asm_mov_ptr_esp_add_exx(0x4, Reg::EAX);
         asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
         asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
@@ -340,4 +344,45 @@ void Code::asm_put_rake(int row, int column) {
     asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
     asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
     asm_call(0x26DA6);
+}
+
+void Code::asm_put_coin(int row, int column, int type, int scene) {
+    int x;
+    int y;
+    int r = row + 1;
+    int c = column + 1;
+    
+    x = 80 * c;
+    switch (scene) {
+        case 2: // pool
+        case 3: // fog
+            y = 55 + 85 * r;
+            break;
+        case 4: // roof
+        case 5: // moon
+            if (c >= 6.0)
+                y = 45 + 85 * r;
+            else
+                y = 45 + 85 * r + 20 * (6 - c);
+            break;
+        case 0: // day
+        case 1: // night
+        case 6: // mushroom garden
+        case 7: // zen garden
+        case 8: // aquarium garden
+        case 9: // tree of wisdom
+        default:
+            y = 40 + 100 * r;
+            break;
+    }
+    y -= 40;
+    
+    asm_mov_dword_ptr_esp_add(0x10, 3); // 0 ~ 7
+    asm_mov_dword_ptr_esp_add(0xC, type);
+    asm_mov_dword_ptr_esp_add(0x8, y);
+    asm_mov_dword_ptr_esp_add(0x4, x);
+    asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
+    asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
+    asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
+    asm_call(0x28E02);
 }

@@ -61,6 +61,8 @@ signals:
     
     void ModifyMode(int mode);
     
+    void StartLevel(int mode);
+    
     void ModifyEndlessLevel(int level);
     
     void ModifyAdventureLevel(int level);
@@ -107,6 +109,8 @@ signals:
     
     void AlwaysShovel(bool on);
     
+    void HideMenu(bool on);
+    
     void ModifyCardProperty(int CardID, int cost, int cooldowntime);
     
     void GetCardProperty(int CardID);
@@ -122,6 +126,8 @@ signals:
     void PutGrave(int row, int column);
     
     void PutRake(int row, int column);
+    
+    void PutCoin(int type, int row, int column);
     
     void PumpkinLadder(bool imitater_only);
     
@@ -239,6 +245,8 @@ signals:
     
     void NoYetiEscape(bool on);
     
+    void NoEnterHouse(bool on);
+    
     void AllZombiesXXX(int status);
     
     void SpawnNextWave();
@@ -337,6 +345,8 @@ public slots:
     void UpdateGigaWaves(std::array<bool, 20> &giga_waves);
     
     void ShowSeed(uint32_t seed);
+    
+    void OpenUserdataFolder(QString DataDir);
     
     void SelectPAKFile();
     

@@ -6,10 +6,13 @@
 #include <QHeaderView>
 #include <QTimer>
 #include <QMenuBar>
+#include <QDesktopServices>
 #include <QFileDialog>
 #include <QDateTime>
 #include <QStandardPaths>
 #include <QDebug>
+
+#define APP_VER "1.3.1"
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
@@ -31,11 +34,19 @@ void MainWindow::ConnectWidgets() {
     auto MenuBar = menuBar();
     auto helpMenu = MenuBar->addMenu("帮助");
     auto showHelp = helpMenu->addAction("使用说明");
+    auto CheckUpdate = helpMenu->addAction("检查更新");
+    MenuBar->addSeparator();
     auto showAbout = helpMenu->addAction("关于");
     auto showAboutQt = helpMenu->addAction("关于Qt");
     connect(showHelp, &QAction::triggered, this, &MainWindow::ShowHelpWindow);
     connect(showAbout, &QAction::triggered, this, &MainWindow::ShowAboutWindow);
+    connect(CheckUpdate, &QAction::triggered, this, [=]() {
+        QString url = "https://github.com/CarrotFish/PvZHelper-Mac/releases";
+        QDesktopServices::openUrl(QUrl(url));
+    });
     connect(showAboutQt, &QAction::triggered, this, &MainWindow::ShowAboutQtWindow);
+    ui->label_35->setText(QStringLiteral("PvZ Helper v") + APP_VER);
+    
     ui->PlantType->addItems(list->PlantsList);
     ui->ZombieType->addItems(list->ZombiesList);
     ui->SlotContent->addItems(list->CardList);
@@ -44,7 +55,7 @@ void MainWindow::ConnectWidgets() {
     ui->ResourceType->setCurrentIndex(1);
     ui->GameScene->addItems(list->MapList);
     ui->PlantHPType->addItems(list->PlantHPList);
-    ui->PlantAttackIntervalType->addItems(list->PlantAttackIntervalList);
+    ui->PlantAttackIntervalType->addItems(list->PlantsList);
     ui->ProjectileType->addItems(list->ProjectileList);
     ui->ZombieHPType->addItems(list->ZombieHPList);
     ui->SpawnType->addItems(list->ZombiesList);
@@ -107,6 +118,10 @@ void MainWindow::ConnectWidgets() {
         int mode = ui->Mode->text().toInt();
         emit ModifyMode(mode);
     });
+    connect(ui->StartLevel, &QPushButton::clicked, this, [=]() {
+        int mode = ui->Mode->text().toInt();
+        emit StartLevel(mode);
+    });
     connect(ui->ModifyEndlessLevel, &QPushButton::clicked, this, [=]() {
         int level = ui->EndlessLevel->text().toInt();
         emit ModifyEndlessLevel(level);
@@ -155,6 +170,7 @@ void MainWindow::ConnectWidgets() {
     connect(ui->FreelyPlant, &QCheckBox::toggled, this, &MainWindow::FreelyPlant);
     connect(ui->PurplePlantAvailable, &QCheckBox::toggled, this, &MainWindow::PurplePlantAvailable);
     connect(ui->AlwaysShovel, &QCheckBox::toggled, this, &MainWindow::AlwaysShovel);
+    connect(ui->HideMenu, &QCheckBox::toggled, this, &MainWindow::HideMenu);
     connect(ui->ModifyCardProperty, &QPushButton::clicked, this, [=]() {
         int CardID = ui->CardID->currentIndex();
         int cost = ui->CardCost->text().toInt(), cooldowntime = ui->CardCooldownTime->text().toInt();
@@ -176,17 +192,23 @@ void MainWindow::ConnectWidgets() {
         int row = ui->Row->text().toInt() - 1, type = ui->RowType->currentIndex();
         emit ModifyRowType(row, type);
     });
-    connect(ui->PutLadder, &QPushButton::clicked, this, [=]() {
-        int row = ui->Row->text().toInt() - 1, column = ui->Column->text().toInt() - 1;
-        emit PutLadder(row, column);
-    });
-    connect(ui->PutGrave, &QPushButton::clicked, this, [=]() {
-        int row = ui->Row->text().toInt() - 1, column = ui->Column->text().toInt() - 1;
-        emit PutGrave(row, column);
-    });
-    connect(ui->PutRake, &QPushButton::clicked, this, [=]() {
-        int row = ui->Row->text().toInt() - 1, column = ui->Column->text().toInt() - 1;
-        emit PutRake(row, column);
+    connect(ui->PutItem, &QPushButton::clicked, this, [=]() {
+        int type = ui->ItemType->currentIndex(), row = ui->Row->text().toInt() - 1, column =
+                ui->Column->text().toInt() - 1;
+        switch (type) {
+            case 0:
+                emit PutLadder(row, column);
+                break;
+            case 1:
+                emit PutGrave(row, column);
+                break;
+            case 2:
+                emit PutRake(row, column);
+                break;
+            default:
+                emit PutCoin(type - 2, row, column);
+                break;
+        }
     });
     connect(ui->PumpkinLadder, &QPushButton::clicked, this, [=]() {
         bool imitater_only = ui->ImitaterOnly->isChecked();
@@ -203,7 +225,7 @@ void MainWindow::ConnectWidgets() {
                 type = ui->ZombieType->currentIndex();
         emit SetZombie(row, column, type);
     });
-    connect(ui->SpawnZombie, &QPushButton::clicked, this, [=](){
+    connect(ui->SpawnZombie, &QPushButton::clicked, this, [=]() {
         int type = ui->ZombieType->currentIndex(), count = ui->ZombieCount->text().toInt();
         emit SpawnZombie(type, count);
     });
@@ -388,6 +410,7 @@ void MainWindow::ConnectWidgets() {
     connect(ui->SlowdownImmune, &QCheckBox::toggled, this, &MainWindow::SlowdownImmune);
     connect(ui->NoIceTrail, &QCheckBox::toggled, this, &MainWindow::NoIceTrail);
     connect(ui->NoYetiEscape, &QCheckBox::toggled, this, &MainWindow::NoYetiEscape);
+    connect(ui->NoEnterHouse, &QCheckBox::toggled, this, &MainWindow::NoEnterHouse);
     connect(ui->AllZombiesXXX, &QPushButton::clicked, this, [=]() {
         int status = ui->ZombieStatus->currentIndex();
         emit AllZombiesXXX(status);
@@ -663,7 +686,7 @@ void MainWindow::ConnectWidgets() {
         }
         emit PackPAK(FolderPath.filePath(), PAKPath.filePath());
     });
-    connect(ui->SetMusic, &QPushButton::clicked, this, [=](){
+    connect(ui->SetMusic, &QPushButton::clicked, this, [=]() {
         int type = ui->MusicType->currentIndex() + 1;
         emit SetMusic(type);
     });
@@ -679,8 +702,6 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::LockMoney, pvz, &PvZ::LockMoney);
     connect(this, &MainWindow::ModifySunLimit, pvz, &PvZ::ModifySunLimit);
     connect(this, &MainWindow::ModifyMoneyLimit, pvz, &PvZ::ModifyMoneyLimit);
-    connect(this, &MainWindow::ModifySun, pvz, &PvZ::ModifySun);
-    connect(this, &MainWindow::ModifyMoney, pvz, &PvZ::ModifyMoney);
     connect(this, &MainWindow::GetSliverSunflower, pvz, &PvZ::GetSliverSunflower);
     connect(this, &MainWindow::GetGoldenSunflower, pvz, &PvZ::GetGoldenSunflower);
     connect(this, &MainWindow::GetAllItems, pvz, &PvZ::GetAllItems);
@@ -693,6 +714,7 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::KeepSunFalling, pvz, &PvZ::KeepSunFalling);
     
     connect(this, &MainWindow::ModifyMode, pvz, &PvZ::ModifyMode);
+    connect(this, &MainWindow::StartLevel, pvz, &PvZ::StartLevel);
     connect(this, &MainWindow::ModifyEndlessLevel, pvz, &PvZ::ModifyEndlessLevel);
     connect(this, &MainWindow::ModifyAdventureLevel, pvz, &PvZ::ModifyAdventureLevel);
     connect(this, &MainWindow::ModifyAdventureCompletionTimes, pvz, &PvZ::ModifyAdventureCompletionTimes);
@@ -717,6 +739,7 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::FreelyPlant, pvz, &PvZ::FreelyPlant);
     connect(this, &MainWindow::PurplePlantAvailable, pvz, &PvZ::PurplePlantAvailable);
     connect(this, &MainWindow::AlwaysShovel, pvz, &PvZ::AlwaysShovel);
+    connect(this, &MainWindow::HideMenu, pvz, &PvZ::HideMenu);
     connect(this, &MainWindow::ModifyCardProperty, pvz, &PvZ::ModifyCardProperty);
     connect(this, &MainWindow::GetCardProperty, pvz, &PvZ::GetCardProperty);
     connect(this, &MainWindow::ModifyGameScene, pvz, &PvZ::ModifyGameScene);
@@ -725,6 +748,7 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::PutLadder, pvz, &PvZ::PutLadder);
     connect(this, &MainWindow::PutGrave, pvz, &PvZ::PutGrave);
     connect(this, &MainWindow::PutRake, pvz, &PvZ::PutRake);
+    connect(this, &MainWindow::PutCoin, pvz, &PvZ::PutCoin);
     connect(this, &MainWindow::PumpkinLadder, pvz, &PvZ::PumpkinLadder);
     connect(this, &MainWindow::SetPlant, pvz, &PvZ::SetPlant);
     connect(this, &MainWindow::SetZombie, pvz, &PvZ::SetZombie);
@@ -737,8 +761,8 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::LawnMowersDisappear, pvz, &PvZ::LawnMowersDisappear);
     connect(this, &MainWindow::ClearAllPlants, pvz, &PvZ::ClearAllPlants);
     connect(this, &MainWindow::ClearAllZombies, pvz, &PvZ::ClearAllZombies);
-    connect(this, &MainWindow::ClearAllItems,pvz, &PvZ::ClearAllItems);
-    connect(this, &MainWindow::ClearAllGridItems,pvz, &PvZ::ClearAllGridItems);
+    connect(this, &MainWindow::ClearAllItems, pvz, &PvZ::ClearAllItems);
+    connect(this, &MainWindow::ClearAllGridItems, pvz, &PvZ::ClearAllGridItems);
     
     connect(this, &MainWindow::ModifyPlantHP, pvz, &PvZ::ModifyPlantHP);
     connect(this, &MainWindow::GetPlantHP, pvz, &PvZ::GetPlantHP);
@@ -785,6 +809,7 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::SlowdownImmune, pvz, &PvZ::SlowdownImmune);
     connect(this, &MainWindow::NoIceTrail, pvz, &PvZ::NoIceTrail);
     connect(this, &MainWindow::NoYetiEscape, pvz, &PvZ::NoYetiEscape);
+    connect(this, &MainWindow::NoEnterHouse, pvz, &PvZ::NoEnterHouse);
     connect(this, &MainWindow::AllZombiesXXX, pvz, &PvZ::AllZombiesXXX);
     connect(this, &MainWindow::SpawnNextWave, pvz, &PvZ::SpawnNextWave);
     
@@ -805,7 +830,7 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::GardenPlantLeft, pvz, &PvZ::GardenPlantLeft);
     
     connect(this, &MainWindow::SetDebugMode, pvz, &PvZ::SetDebugMode);
-    connect(this, &MainWindow::OpenUserdata, pvz, &PvZ::OpenUserdata);
+    connect(this, &MainWindow::OpenUserdata, pvz, &PvZ::GetUserdataFolder);
     connect(this, &MainWindow::SetSeed, pvz, &PvZ::SetSeed);
     connect(this, &MainWindow::GetSeed, pvz, &PvZ::GetSeed);
     connect(this, &MainWindow::GetRandomSeed, pvz, &PvZ::GetRandomSeed);
@@ -856,11 +881,11 @@ void MainWindow::ShowAboutWindow() {
     auto AboutWindow = new QMessageBox(this);
     AboutWindow->setWindowTitle("关于");
     AboutWindow->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-    QString Message = "<h3>关于</h3>"
-                      "<p>PvZ Helper v 1.3</p>"
-                      "<p>本程序由百度贴吧@46287153制作</p>"
-                      "<p><a href=\"https://tieba.baidu.com/f?kw=植物大战僵尸\">植物大战僵尸吧</a></p>"
-                      "<a href=\"https://tieba.baidu.com/home/main?un=46287153\">@46287153</a>";
+    QString Message = QStringLiteral("<h3>关于</h3><p>PvZ Helper v") + APP_VER + "</p>"
+                      + "<p>本程序由百度贴吧@46287153制作</p>"
+                        "<p><a href=\"https://tieba.baidu.com/f?kw=植物大战僵尸\">植物大战僵尸吧</a></p>"
+                        "<a href=\"https://tieba.baidu.com/home/main?un=46287153\">@46287153</a>"
+                        "<p><a href=\"https://github.com/CarrotFish/PvZHelper-Mac\">源代码</a></p>";
     AboutWindow->setText(Message);
     AboutWindow->setTextFormat(Qt::TextFormat::RichText);
     AboutWindow->setTextInteractionFlags(Qt::TextInteractionFlag::LinksAccessibleByMouse);
@@ -1276,6 +1301,11 @@ void MainWindow::UpdateGigaWaves(std::array<bool, 20> &giga_waves) {
 
 void MainWindow::ShowSeed(uint32_t seed) {
     ui->SpawnSeed->setText(QString("%1").arg(seed, 8, 16, QLatin1Char('0')).toUpper());
+}
+
+void MainWindow::OpenUserdataFolder(QString DataDir) {
+    DataDir = "file:" + DataDir;
+    QDesktopServices::openUrl(QUrl(DataDir, QUrl::TolerantMode));
 }
 
 void MainWindow::SelectPAKFile() {
