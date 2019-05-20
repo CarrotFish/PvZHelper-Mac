@@ -4,8 +4,6 @@
 #include <random>
 #include <QDebug>
 
-typedef uint8_t byte;
-
 template<typename T, typename... Args>
 inline T PvZ::ReadMemory(Args... address) {
     return memory.ReadMem<T>({static_cast<uintptr_t>(address)...});
@@ -19,6 +17,40 @@ inline std::array<T, size> PvZ::ReadMemory(Args... address) {
 template<typename T, typename... Args>
 inline void PvZ::WriteMemory(T value, Args... address) {
     memory.WriteMem<T>(value, {static_cast<uintptr_t>(address)...});
+}
+
+template<size_t original_size, size_t size>
+void PvZ::CodeInject(bool on, uint32_t address, std::array<byte, size> &ar) {
+    uint32_t injected_code = 0;
+    const int code_size = size + original_size + 5;
+    if (on) {
+        injected_code = (uint32_t) memory.Allocate(code_size, VM_PROT_ALL);
+        if (injected_code) {
+            uint32_t offset = injected_code - address - 5, offset2 =
+                    address + original_size - injected_code - code_size;
+            
+            std::array<byte, original_size> ar1{};
+            ar1.fill(0x90);
+            ar1[0] = 0xE9;
+            memcpy(&ar1[1], &offset, 4);
+            
+            auto ar2 = ReadMemory<byte, original_size>(address);
+            std::array<byte, code_size> ar3{};
+            memcpy(&ar3[0], &ar[0], size);
+            memcpy(&ar3[size], &ar2[0], original_size);
+            ar3[code_size - 5] = 0xE9;
+            memcpy(&ar3[code_size - 4], &offset2, 4);
+            
+            WriteMemory(ar3, injected_code);
+            WriteMemory(ar1, address);
+        }
+    } else if (ReadMemory<byte>(address) == 0xE9) {
+        auto offset = ReadMemory<uint32_t>(address + 1);
+        injected_code = offset + address + 5;
+        auto ar1 = ReadMemory<byte, original_size>(injected_code + size);
+        WriteMemory(ar1, address);
+        memory.Free(injected_code, code_size);
+    }
 }
 
 PvZ::PvZ(Ui::MainWindow *ui, MainWindow *MainWindow) : GameProc(new xnu_proc), ui(ui), window(MainWindow),
@@ -308,60 +340,17 @@ void PvZ::GetResourceValue(int type) {
 
 void PvZ::AutoCollect(bool on) {
     if (isGameOn()) {
-        // if (on)
-        //     WriteMemory<byte>(0xEB, 0x9FF80);
-        // else
-        //     WriteMemory<byte>(0x74, 0x9FF80);
-        static uint32_t injected_code = 0;
-        const int code_size = 30;
-        const int original_size = 6;
-        uint32_t original_code = 0x9FF82;//0x9EAF2;
-        if (on) {
-            injected_code = (uint32_t) memory.Allocate(code_size * sizeof(byte), VM_PROT_ALL);
-            if (injected_code) {
-                uint32_t offset = injected_code - original_code - 5, offset2 =
-                        original_code + original_size - injected_code - code_size;
-                std::array<byte, original_size> ar = {0xE9, 0x00, 0x00, 0x00, 0x00, 0x90};
-                memcpy(&ar[1], &offset, 4 * sizeof(byte));
-                std::array<byte, code_size> ar2 = {0x8B, 0x45, 0x08, 0x89, 0x04, 0x24, 0xE8, 0x02, 0x00, 0x00, 0x00,
-                                                   0xEB, 0x06, 0x68, 0x32, 0xBC, 0x09, 0x00, 0xC3, 0x8B, 0x45, 0x08,
-                                                   0x8B, 0x40, 0x24, 0xE9, 0x00, 0x00, 0x00, 0x00};
-                memcpy(&ar2[code_size - 4], &offset2, 4 * sizeof(byte));
-                WriteMemory(ar2, injected_code);
-                WriteMemory(ar, original_code);
-            }
-        } else {
-            if (injected_code) {
-                WriteMemory(std::array<byte, original_size>{0x8B, 0x45, 0x08, 0x8B, 0x40, 0x24}, original_code);
-                memory.Free(injected_code, code_size * sizeof(byte));
-            }
-        }
+        std::array<byte, 19> ar = {0x8B, 0x45, 0x08, 0x89, 0x04, 0x24, 0xE8, 0x02, 0x00, 0x00, 0x00,
+                                   0xEB, 0x06, 0x68, 0x32, 0xBC, 0x09, 0x00, 0xC3};
+        CodeInject<6>(on, 0x9FF82, ar);
     }
 }
 
 void PvZ::NoMoneyDrops(bool on) {
     if (isGameOn()) {
-        static uint32_t InjectedCode = 0;
-        if (on) {
-            InjectedCode = (uint32_t) memory.Allocate(34 * sizeof(byte), VM_PROT_ALL);
-            if (InjectedCode) {
-                uint32_t offset = InjectedCode - 0x1C5A5 - 5, offset2 = 0x1C5AC - InjectedCode - 34;
-                std::array<byte, 7> ar = {0xE9, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90};
-                memcpy(&ar[1], &offset, 4 * sizeof(byte));
-                std::array<byte, 34> ar2 = {0x8B, 0x40, 0x58, 0x83, 0xF8, 0x03, 0x7F, 0x09, 0x8B, 0x45, 0x0C,
-                                            0x8B, 0x00, 0xC6, 0x40, 0x38, 0x01, 0x8B, 0x45, 0x0C, 0x8B, 0x00,
-                                            0x0F, 0xB6, 0x40, 0x38, 0x83, 0xF0, 0x01, 0xE9, 0x00, 0x00, 0x00,
-                                            0x00};
-                memcpy(&ar2[30], &offset2, 4 * sizeof(byte));
-                WriteMemory(ar2, InjectedCode);
-                WriteMemory(ar, 0x1C5A5);
-            }
-        } else {
-            if (InjectedCode) {
-                WriteMemory(std::array<byte, 7>{0x0F, 0xB6, 0x40, 0x38, 0x83, 0xF0, 0x01}, 0x1C5A5);
-                memory.Free(InjectedCode, 34 * sizeof(byte));
-            }
-        }
+        std::array<byte, 22> ar = {0x8B, 0x40, 0x58, 0x83, 0xF8, 0x03, 0x7F, 0x09, 0x8B, 0x45, 0x0C,
+                                   0x8B, 0x00, 0xC6, 0x40, 0x38, 0x01, 0x8B, 0x45, 0x0C, 0x8B, 0x00};
+        CodeInject<7>(on, 0x1C5A5, ar);
     }
 }
 
@@ -949,8 +938,7 @@ void PvZ::PutRake(int row, int column) {
 }
 
 void PvZ::PutCoin(int type, int row, int column) {
-    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3))
-    {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
         int scene = CurScene();
         int row_count = CurRowCount();
         int col_count = 9;

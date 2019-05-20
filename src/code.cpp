@@ -1,7 +1,5 @@
 #include "code.h"
 #include "xnumem.h"
-#include <mach/thread_act.h>
-#include <mach/thread_status.h>
 #include <array>
 #include <QDebug>
 
@@ -279,9 +277,8 @@ void Code::asm_set_plant(int row, int column, int type, bool imitater, bool iz_s
     if (imitater && !iz_style) {
         asm_mov_dword_ptr_esp_add(0x10, type);
         type = 48;
-    } else {
+    } else
         asm_mov_dword_ptr_esp_add(0x10, -1);
-    }
     asm_mov_dword_ptr_esp_add(0xC, type);
     asm_mov_dword_ptr_esp_add(0x8, row);
     asm_mov_dword_ptr_esp_add(0x4, column);

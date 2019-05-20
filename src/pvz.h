@@ -5,6 +5,8 @@
 #include <array>
 #include "xnumem.h"
 
+typedef uint8_t byte;
+
 namespace Ui {
     class MainWindow;
 }
@@ -364,6 +366,9 @@ private:
     
     template<typename T, typename... Args>
     void WriteMemory(T value, Args... address);
+    
+    template<size_t original_size, size_t size>
+    void CodeInject(bool on, uint32_t address, std::array<byte, size> &ar);
     
     int CurGameMode();
     

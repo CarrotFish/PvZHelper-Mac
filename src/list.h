@@ -11,7 +11,6 @@ public:
     QStringList ResourceList;
     QStringList MapList;
     QStringList PlantHPList;
-    QStringList PlantAttackIntervalList;
     QStringList ProjectileList;
     QStringList ZombieHPList;
 };

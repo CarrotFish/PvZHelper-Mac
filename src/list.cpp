@@ -193,25 +193,6 @@ List::List() {
             << QStringLiteral("地刺王")
             << QStringLiteral("爆炸坚果")
             << QStringLiteral("巨型坚果");
-    PlantAttackIntervalList
-            << QStringLiteral("豌豆射手")
-            << QStringLiteral("寒冰射手")
-            << QStringLiteral("双发射手")
-            << QStringLiteral("小喷菇")
-            << QStringLiteral("大喷菇")
-            << QStringLiteral("胆小菇")
-            << QStringLiteral("三线射手")
-            << QStringLiteral("海蘑菇")
-            << QStringLiteral("仙人掌")
-            << QStringLiteral("裂荚射手")
-            << QStringLiteral("杨桃")
-            << QStringLiteral("卷心菜投手")
-            << QStringLiteral("玉米投手")
-            << QStringLiteral("西瓜投手")
-            << QStringLiteral("机枪射手")
-            << QStringLiteral("忧郁菇")
-            << QStringLiteral("香蒲")
-            << QStringLiteral("冰瓜");
     ProjectileList
             << QStringLiteral("豌豆")
             << QStringLiteral("冰豌豆")
