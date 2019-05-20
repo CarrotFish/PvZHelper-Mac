@@ -12,6 +12,8 @@
 #include <QStandardPaths>
 #include <QDebug>
 
+#define APP_VER "1.3.1"
+
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow), SpawnTable(new QTableWidget(this)), pvz(new PvZ(ui, this)),
@@ -32,11 +34,19 @@ void MainWindow::ConnectWidgets() {
     auto MenuBar = menuBar();
     auto helpMenu = MenuBar->addMenu("帮助");
     auto showHelp = helpMenu->addAction("使用说明");
+    auto CheckUpdate = helpMenu->addAction("检查更新");
+    MenuBar->addSeparator();
     auto showAbout = helpMenu->addAction("关于");
     auto showAboutQt = helpMenu->addAction("关于Qt");
     connect(showHelp, &QAction::triggered, this, &MainWindow::ShowHelpWindow);
     connect(showAbout, &QAction::triggered, this, &MainWindow::ShowAboutWindow);
+    connect(CheckUpdate, &QAction::triggered, this, [=]() {
+        QString url = "https://github.com/CarrotFish/PvZHelper-Mac/releases";
+        QDesktopServices::openUrl(QUrl(url));
+    });
     connect(showAboutQt, &QAction::triggered, this, &MainWindow::ShowAboutQtWindow);
+    ui->label_35->setText(QStringLiteral("PvZ Helper v") + APP_VER);
+    
     ui->PlantType->addItems(list->PlantsList);
     ui->ZombieType->addItems(list->ZombiesList);
     ui->SlotContent->addItems(list->CardList);
@@ -871,11 +881,11 @@ void MainWindow::ShowAboutWindow() {
     auto AboutWindow = new QMessageBox(this);
     AboutWindow->setWindowTitle("关于");
     AboutWindow->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-    QString Message = "<h3>关于</h3>"
-                      "<p>PvZ Helper v 1.3</p>"
-                      "<p>本程序由百度贴吧@46287153制作</p>"
-                      "<p><a href=\"https://tieba.baidu.com/f?kw=植物大战僵尸\">植物大战僵尸吧</a></p>"
-                      "<a href=\"https://tieba.baidu.com/home/main?un=46287153\">@46287153</a>";
+    QString Message = QStringLiteral("<h3>关于</h3><p>PvZ Helper v") + APP_VER + "</p>"
+                      + "<p>本程序由百度贴吧@46287153制作</p>"
+                        "<p><a href=\"https://tieba.baidu.com/f?kw=植物大战僵尸\">植物大战僵尸吧</a></p>"
+                        "<a href=\"https://tieba.baidu.com/home/main?un=46287153\">@46287153</a>"
+                        "<p><a href=\"https://github.com/CarrotFish/PvZHelper-Mac\">源代码</a></p>";
     AboutWindow->setText(Message);
     AboutWindow->setTextFormat(Qt::TextFormat::RichText);
     AboutWindow->setTextInteractionFlags(Qt::TextInteractionFlag::LinksAccessibleByMouse);

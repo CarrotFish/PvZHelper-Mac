@@ -4503,12 +4503,12 @@
      <rect>
       <x>10</x>
       <y>280</y>
-      <width>101</width>
+      <width>111</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>PvZ Helper v1.3</string>
+     <string>PvZ Helper v1.3.1</string>
     </property>
    </widget>
   </widget>
