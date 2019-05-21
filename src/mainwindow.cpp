@@ -948,6 +948,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         emit FreelyPlant(false);
         emit PurplePlantAvailable(false);
         emit AlwaysShovel(false);
+        emit HideMenu(false);
         
         emit NoFog(false);
         emit BigFog(false);
@@ -968,6 +969,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         emit AlwaysKernal(false);
         emit AlwaysButter(false);
         emit StrongBlover(false);
+        emit BeghouledFreelyMove(false);
         
         emit ZombieInvincible(false);
         emit ZombieWeak(false);
@@ -989,6 +991,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         emit SlowdownImmune(false);
         emit NoIceTrail(false);
         emit NoYetiEscape(false);
+        emit NoEnterHouse(false);
         
         emit NoSnailSleep(false);
         
@@ -1070,6 +1073,7 @@ void MainWindow::MaintainCheckedItem() {
         emit FreelyPlant(ui->FreelyPlant->isChecked());
         emit PurplePlantAvailable(ui->PurplePlantAvailable->isChecked());
         emit AlwaysShovel(ui->AlwaysShovel->isChecked());
+        emit HideMenu(ui->HideMenu->isChecked());
         
         emit NoFog(ui->NoFog->isChecked());
         emit BigFog(ui->BigFog->isChecked());
@@ -1090,6 +1094,7 @@ void MainWindow::MaintainCheckedItem() {
         emit AlwaysKernal(ui->AlwaysKernal->isChecked());
         emit AlwaysButter(ui->AlwaysButter->isChecked());
         emit StrongBlover(ui->StrongBlover->isChecked());
+        emit BeghouledFreelyMove(ui->BeghouledFreelyMove->isChecked());
         
         emit ZombieInvincible(ui->ZombieInvincible->isChecked());
         emit ZombieWeak(ui->ZombieWeak->isChecked());
@@ -1111,6 +1116,7 @@ void MainWindow::MaintainCheckedItem() {
         emit SlowdownImmune(ui->SlowdownImmune->isChecked());
         emit NoIceTrail(ui->NoIceTrail->isChecked());
         emit NoYetiEscape(ui->NoYetiEscape->isChecked());
+        emit NoEnterHouse(ui->NoEnterHouse->isChecked());
         
         emit NoSnailSleep(ui->NoSnailSleep->isChecked());
         
