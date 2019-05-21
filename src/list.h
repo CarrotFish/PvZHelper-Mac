@@ -13,6 +13,7 @@ public:
     QStringList PlantHPList;
     QStringList ProjectileList;
     QStringList ZombieHPList;
+    QStringList NonMaintainCheckBox;
 };
 
 #endif

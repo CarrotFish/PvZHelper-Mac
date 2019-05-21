@@ -927,78 +927,16 @@ void MainWindow::ShowSpawnHelpWindow() {
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     if (pvz->isGameOn(false) && !ui->KeepChangesOnExit->isChecked()) {
-        emit LockSun(false);
-        emit LockMoney(false);
-        emit AutoCollect(false);
-        emit NoMoneyDrops(false);
-        
-        emit ShowLimboPage(false);
-        emit UnlockAllModes(false);
-        emit ItsRaining(false);
-        emit ZombieQuick(false);
-        emit BungeeBlitz(false);
-        emit HighGravity(false);
-        emit GraveDanger(false);
-        emit SunnyDay(false);
-        emit DarkStormyNight(false);
-        emit BigTime(false);
-        emit ColumnLike(false);
-        
-        emit NoCoolDown(false);
-        emit FreelyPlant(false);
-        emit PurplePlantAvailable(false);
-        emit AlwaysShovel(false);
-        emit HideMenu(false);
-        
-        emit NoFog(false);
-        emit BigFog(false);
-        emit SeeVase(false);
-        
-        emit PlantInvincible(false);
-        emit PlantWeak(false);
-        emit ChomperNoCD(false);
-        emit PotatoMineNoCD(false);
-        emit BombNoExplode(false);
-        emit BombInstantlyExplode(false);
-        emit CobCannonNoCD(false);
-        emit MagnetShroomNoCD(false);
-        emit NoCrater(false);
-        emit PlantBoard(false);
-        emit MushroomAwake(false);
-        emit SunShroomGrow(false);
-        emit AlwaysKernal(false);
-        emit AlwaysButter(false);
-        emit StrongBlover(false);
-        emit BeghouledFreelyMove(false);
-        
-        emit ZombieInvincible(false);
-        emit ZombieWeak(false);
-        emit JackNoExplode(false);
-        emit JackImmediatelyExplode(false);
-        emit NoImpThrow(false);
-        emit InfiniteImpThrow(false);
-        // emit NoBasketball(false);
-        emit StandingStill(false);
-        emit InfiniteBasketball(false);
-        emit NoZombieSpawn(false);
-        emit AllZombieSpawn(false);
-        emit NoThreesome(false);
-        emit InfinitePole(false);
-        emit ZombieInvisible(false);
-        emit ZombieVisible(false);
-        emit ButterImmune(false);
-        emit IceImmune(false);
-        emit SlowdownImmune(false);
-        emit NoIceTrail(false);
-        emit NoYetiEscape(false);
-        emit NoEnterHouse(false);
-        
-        emit NoSnailSleep(false);
-        
-        emit BackgroundRunning(false);
-        emit DisablePause(false);
-        emit NoDataSave(false);
-        emit NoDataDelete(false);
+        for (int i = 0; i < ui->tabWidget->count(); i++) {
+            auto Tab = ui->tabWidget->widget(i);
+            auto WidgetList = Tab->findChildren<QCheckBox *>();
+            for (auto CheckBox:WidgetList) {
+                if (CheckBox->isChecked() && !list->NonMaintainCheckBox.contains(CheckBox->objectName())) {
+                    CheckBox->toggle();
+                }
+            }
+        }
+        return;
     }
     event->accept();
 }
@@ -1050,80 +988,15 @@ void MainWindow::GameNotFound(bool alert) {
 
 void MainWindow::MaintainCheckedItem() {
     if (pvz->isGameOn()) {
-        emit LockSun(ui->LockSun->isChecked());
-        emit LockMoney(ui->LockMoney->isChecked());
-        emit AutoCollect(ui->AutoCollect->isChecked());
-        emit NoMoneyDrops(ui->NoMoneyDrops->isChecked());
-        emit NoSunFalling(ui->NoSunFalling->isChecked());
-        emit KeepSunFalling(ui->KeepSunFalling->isChecked());
-        
-        emit ShowLimboPage(ui->ShowLimboPage->isChecked());
-        emit UnlockAllModes(ui->UnlockAllModes->isChecked());
-        emit ItsRaining(ui->ItsRaining->isChecked());
-        emit ZombieQuick(ui->ZombieQuick->isChecked());
-        emit BungeeBlitz(ui->BungeeBlitz->isChecked());
-        emit HighGravity(ui->HighGravity->isChecked());
-        emit GraveDanger(ui->GraveDanger->isChecked());
-        emit SunnyDay(ui->SunnyDay->isChecked());
-        emit DarkStormyNight(ui->DarkStormyNight->isChecked());
-        emit BigTime(ui->BigTime->isChecked());
-        emit ColumnLike(ui->ColumnLike->isChecked());
-        
-        emit NoCoolDown(ui->NoCoolDown->isChecked());
-        emit FreelyPlant(ui->FreelyPlant->isChecked());
-        emit PurplePlantAvailable(ui->PurplePlantAvailable->isChecked());
-        emit AlwaysShovel(ui->AlwaysShovel->isChecked());
-        emit HideMenu(ui->HideMenu->isChecked());
-        
-        emit NoFog(ui->NoFog->isChecked());
-        emit BigFog(ui->BigFog->isChecked());
-        emit SeeVase(ui->SeeVase->isChecked());
-        
-        emit PlantInvincible(ui->PlantInvincible->isChecked());
-        emit PlantWeak(ui->PlantWeak->isChecked());
-        emit ChomperNoCD(ui->ChomperNoCD->isChecked());
-        emit PotatoMineNoCD(ui->PotatoMineNoCD->isChecked());
-        emit BombNoExplode(ui->BombNoExplode->isChecked());
-        emit BombInstantlyExplode(ui->BombInstantlyExplode->isChecked());
-        emit CobCannonNoCD(ui->CobCannonNoCD->isChecked());
-        emit MagnetShroomNoCD(ui->MagnetShroomNoCD->isChecked());
-        emit NoCrater(ui->NoCrater->isChecked());
-        emit PlantBoard(ui->PlantBoard->isChecked());
-        emit MushroomAwake(ui->MushroomAwake->isChecked());
-        emit SunShroomGrow(ui->SunShroomGrow->isChecked());
-        emit AlwaysKernal(ui->AlwaysKernal->isChecked());
-        emit AlwaysButter(ui->AlwaysButter->isChecked());
-        emit StrongBlover(ui->StrongBlover->isChecked());
-        emit BeghouledFreelyMove(ui->BeghouledFreelyMove->isChecked());
-        
-        emit ZombieInvincible(ui->ZombieInvincible->isChecked());
-        emit ZombieWeak(ui->ZombieWeak->isChecked());
-        emit JackNoExplode(ui->JackNoExplode->isChecked());
-        emit JackImmediatelyExplode(ui->JackImmediatelyExplode->isChecked());
-        emit NoImpThrow(ui->NoImpThrow->isChecked());
-        emit InfiniteImpThrow(ui->InfiniteImpThrow->isChecked());
-        // emit NoBasketball(ui->NoBasketball->isChecked());
-        emit StandingStill(ui->StandingStill->isChecked());
-        emit InfiniteBasketball(ui->InfiniteBasketball->isChecked());
-        emit NoZombieSpawn(ui->NoZombieSpawn->isChecked());
-        emit AllZombieSpawn(ui->AllZombieSpawn->isChecked());
-        emit NoThreesome(ui->NoThreesome->isChecked());
-        emit InfinitePole(ui->InfinitePole->isChecked());
-        emit ZombieInvisible(ui->ZombieInvisible->isChecked());
-        emit ZombieVisible(ui->ZombieVisible->isChecked());
-        emit ButterImmune(ui->ButterImmune->isChecked());
-        emit IceImmune(ui->IceImmune->isChecked());
-        emit SlowdownImmune(ui->SlowdownImmune->isChecked());
-        emit NoIceTrail(ui->NoIceTrail->isChecked());
-        emit NoYetiEscape(ui->NoYetiEscape->isChecked());
-        emit NoEnterHouse(ui->NoEnterHouse->isChecked());
-        
-        emit NoSnailSleep(ui->NoSnailSleep->isChecked());
-        
-        emit BackgroundRunning(ui->BackgroundRunning->isChecked());
-        emit DisablePause(ui->DisablePause->isChecked());
-        emit NoDataDelete(ui->NoDataDelete->isChecked());
-        emit NoDataSave(ui->NoDataSave->isChecked());
+        for (int i = 0; i < ui->tabWidget->count(); i++) {
+            auto Tab = ui->tabWidget->widget(i);
+            auto WidgetList = Tab->findChildren<QCheckBox *>();
+            for (auto CheckBox:WidgetList) {
+                if (!list->NonMaintainCheckBox.contains(CheckBox->objectName()))
+                        emit CheckBox->toggled(CheckBox->isChecked());
+            }
+        }
+        return;
     }
 }
 
