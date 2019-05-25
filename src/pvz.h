@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <array>
+#include <initializer_list>
 #include "xnumem.h"
 
 typedef uint8_t byte;
@@ -297,6 +298,8 @@ public slots:
     
     void NoEnterHouse(bool on);
     
+    void GatherZombies(bool on, float pos);
+    
     void AllZombiesXXX(int status);
     
     void SpawnNextWave();
@@ -367,8 +370,10 @@ private:
     template<typename T, typename... Args>
     void WriteMemory(T value, Args... address);
     
-    template<size_t original_size, size_t size>
-    void CodeInject(bool on, uint32_t address, std::array<byte, size> &ar);
+    void WriteMemory(std::initializer_list<byte> il, uintptr_t address);
+    
+    template<size_t size>
+    void CodeInject(bool on, uint32_t address, const std::array<byte, size> &ar, size_t original_size);
     
     int CurGameMode();
     

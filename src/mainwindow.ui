@@ -1577,8 +1577,8 @@
        <rect>
         <x>80</x>
         <y>20</y>
-        <width>61</width>
-        <height>21</height>
+        <width>60</width>
+        <height>22</height>
        </rect>
       </property>
       <property name="wrapping">
@@ -1599,8 +1599,8 @@
        <rect>
         <x>80</x>
         <y>55</y>
-        <width>61</width>
-        <height>21</height>
+        <width>60</width>
+        <height>22</height>
        </rect>
       </property>
       <property name="wrapping">
@@ -2757,7 +2757,7 @@
       <property name="geometry">
        <rect>
         <x>115</x>
-        <y>210</y>
+        <y>220</y>
         <width>110</width>
         <height>30</height>
        </rect>
@@ -2792,7 +2792,7 @@
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>215</y>
+        <y>225</y>
         <width>52</width>
         <height>19</height>
        </rect>
@@ -2805,7 +2805,7 @@
       <property name="geometry">
        <rect>
         <x>230</x>
-        <y>210</y>
+        <y>220</y>
         <width>100</width>
         <height>30</height>
        </rect>
@@ -2844,7 +2844,7 @@
       <property name="geometry">
        <rect>
         <x>390</x>
-        <y>210</y>
+        <y>220</y>
         <width>100</width>
         <height>30</height>
        </rect>
@@ -2864,6 +2864,44 @@
       </property>
       <property name="text">
        <string>不进家门</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="GatherZombies">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>200</y>
+        <width>51</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>吸怪</string>
+      </property>
+     </widget>
+     <widget class="QScrollBar" name="ZombiePosition">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>200</y>
+        <width>271</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>800</number>
+      </property>
+      <property name="value">
+       <number>600</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="invertedAppearance">
+       <bool>false</bool>
+      </property>
+      <property name="invertedControls">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>

@@ -247,6 +247,8 @@ signals:
     
     void NoEnterHouse(bool on);
     
+    void GatherZombies(bool on, float pos);
+    
     void AllZombiesXXX(int status);
     
     void SpawnNextWave();
