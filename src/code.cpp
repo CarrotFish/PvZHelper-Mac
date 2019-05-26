@@ -346,6 +346,26 @@ void Code::asm_put_rake(int row, int column) {
     asm_call(0x26DA6);
 }
 
+void Code::asm_put_portal(int row, int column, int type) {
+    asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
+    asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
+    asm_add_exx(Reg::EAX, 0x110);
+    asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
+    asm_call(0x32832);
+    asm_mov_dword_ptr_exx_add(Reg::EAX, 0x8, type);
+    asm_mov_dword_ptr_exx_add(Reg::EAX, 0x10, column);
+    asm_mov_dword_ptr_exx_add(Reg::EAX, 0x14, row);
+    asm_add_word(0xC189);   //mov ecx, eax
+    asm_mov_dword_ptr_esp_add(0x8, 0);
+    asm_mov_dword_ptr_esp_add(0x4, row);
+    asm_mov_dword_ptr_esp_add(0x0, 307000);
+    asm_call(0xFDB8);
+    asm_add_byte(0x89);     //mov [ecx+0x1c], eax
+    asm_add_word(0x1C41);
+    asm_mov_ptr_esp_add_exx(0x0, Reg::ECX);
+    asm_call(0x20898C);
+}
+
 void Code::asm_put_coin(int row, int column, int type, int scene) {
     int x;
     int y;

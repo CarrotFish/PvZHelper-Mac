@@ -70,6 +70,8 @@ public:
     
     void asm_put_rake(int row, int column);
     
+    void asm_put_portal(int row, int column, int type);
+    
     void asm_put_coin(int row, int column, int type, int scene);
 
 protected:

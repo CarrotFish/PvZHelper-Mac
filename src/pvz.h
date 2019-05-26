@@ -196,6 +196,14 @@ public slots:
     
     void LawnMowersDisappear();
     
+    void SetBlackPortal(int row_1, int column_1, int row_2, int column_2);
+    
+    void SetWhitePortal(int row_1, int column_1, int row_2, int column_2);
+    
+    void ActivePortal(bool on);
+    
+    void LockPortal(bool on);
+    
     void ClearAllPlants();
     
     void ClearAllZombies();

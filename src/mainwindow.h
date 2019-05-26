@@ -13,6 +13,8 @@ class PvZ;
 
 class List;
 
+class Portal;
+
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
@@ -148,6 +150,14 @@ signals:
     void LawnMowersReset();
     
     void LawnMowersDisappear();
+    
+    void SetBlackPortal(int row_1, int column_1, int row_2, int column_2);
+    
+    void SetWhitePortal(int row_1, int column_1, int row_2, int column_2);
+    
+    void ActivePortal(bool on);
+    
+    void LockPortal(bool on);
     
     void ClearAllPlants();
     
@@ -379,6 +389,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QTableWidget *SpawnTable;
+    Portal *PortalWindow;
     PvZ *pvz;
     List *list;
 protected:

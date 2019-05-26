@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "list.h"
 #include "pvz.h"
+#include "portal.h"
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QTimer>
@@ -16,9 +17,11 @@
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
-        ui(new Ui::MainWindow), SpawnTable(new QTableWidget(this)), pvz(new PvZ(ui, this)),
+        ui(new Ui::MainWindow), SpawnTable(new QTableWidget(this)), PortalWindow(new Portal(this)),
+        pvz(new PvZ(ui, this)),
         list(new List) {
     SpawnTable->hide();
+    PortalWindow->hide();
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
                    Qt::WindowMinimizeButtonHint);
@@ -243,6 +246,9 @@ void MainWindow::ConnectWidgets() {
     connect(ui->LawnMowerStart, &QPushButton::clicked, this, &MainWindow::LawnMowersStart);
     connect(ui->LawnMowerReset, &QPushButton::clicked, this, &MainWindow::LawnMowersReset);
     connect(ui->LawnMowerDisappear, &QPushButton::clicked, this, &MainWindow::LawnMowersDisappear);
+    connect(ui->ShowPortal, &QPushButton::clicked, this, [=]() {
+        PortalWindow->show();
+    });
     connect(ui->ClearAll, &QPushButton::clicked, this, [=]() {
         int type = ui->ObjectType->currentIndex();
         switch (type) {
@@ -768,6 +774,10 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::LawnMowersStart, pvz, &PvZ::LawnMowersStart);
     connect(this, &MainWindow::LawnMowersReset, pvz, &PvZ::LawnMowersReset);
     connect(this, &MainWindow::LawnMowersDisappear, pvz, &PvZ::LawnMowersDisappear);
+    connect(this, &MainWindow::SetBlackPortal, pvz, &PvZ::SetBlackPortal);
+    connect(this, &MainWindow::SetWhitePortal, pvz, &PvZ::SetWhitePortal);
+    connect(this, &MainWindow::ActivePortal, pvz, &PvZ::ActivePortal);
+    connect(this, &MainWindow::LockPortal, pvz, &PvZ::LockPortal);
     connect(this, &MainWindow::ClearAllPlants, pvz, &PvZ::ClearAllPlants);
     connect(this, &MainWindow::ClearAllZombies, pvz, &PvZ::ClearAllZombies);
     connect(this, &MainWindow::ClearAllItems, pvz, &PvZ::ClearAllItems);
@@ -946,8 +956,9 @@ void MainWindow::closeEvent(QCloseEvent *event) {
                 }
             }
         }
-        return;
+        PortalWindow->RestoreChanges();
     }
+    delete PortalWindow;
     event->accept();
 }
 

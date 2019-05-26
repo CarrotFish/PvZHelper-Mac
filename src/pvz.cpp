@@ -29,6 +29,11 @@ void PvZ::CodeInject(bool on, uint32_t address, const std::array<byte, size> &ar
     const int code_size = size + original_size + 5;
     if (on) {
         injected_code = (uint32_t) memory.Allocate(code_size, VM_PROT_ALL);
+
+#ifndef NDEBUG
+        qDebug() << injected_code;
+#endif
+        
         if (injected_code) {
             uint32_t offset = injected_code - address - 5,
                     offset2 = address + original_size - injected_code - code_size;
@@ -1027,7 +1032,7 @@ void PvZ::SetPlant(int row, int column, int type, bool imitater) {
 
 void PvZ::SetZombie(int row, int column, int type) {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
-        if (type == 25) {//Dr.Zomboss
+        if (type == 25) { //Dr.Zomboss
             SpawnZombie(25, 1);
             return;
         }
@@ -1158,6 +1163,79 @@ void PvZ::LawnMowersDisappear() {
         }
         code.asm_ret();
         code.asm_code_inject();
+    }
+}
+
+void PvZ::SetBlackPortal(int row_1, int column_1, int row_2, int column_2) {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
+        if (ReadMemory<int>(base, 0x780, 0x154, 0x58) == 0)
+            WriteMemory<int>(6000, base, 0x780, 0x154, 0x58);
+        ClearAllGridItems(5);
+        code.asm_init();
+        code.asm_put_portal(row_1, column_1, 5);
+        code.asm_put_portal(row_2, column_2, 5);
+        code.asm_ret();
+        code.asm_code_inject();
+    }
+}
+
+void PvZ::SetWhitePortal(int row_1, int column_1, int row_2, int column_2) {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
+        if (ReadMemory<int>(base, 0x780, 0x154, 0x58) == 0)
+            WriteMemory<int>(6000, base, 0x780, 0x154, 0x58);
+        ClearAllGridItems(4);
+        code.asm_init();
+        code.asm_put_portal(row_1, column_1, 4);
+        code.asm_put_portal(row_2, column_2, 4);
+        code.asm_ret();
+        code.asm_code_inject();
+    }
+}
+
+void PvZ::ActivePortal(bool on) {
+    if (isGameOn()) {
+        std::array<byte, 86> ar = {0xA1, 0x64, 0xEE, 0x35, 0x00, //mov eax, [0x35ee64]
+                                   0x8B, 0x80, 0x80, 0x07, 0x00, 0x00, //mov eax, [eax+0x780]
+                                   0x8B, 0x80, 0x14, 0x01, 0x00, 0x00, //mov eax, [eax+0x114]
+                                   0x89, 0x45, 0xC8, //mov [ebp-0x38], eax
+                                   0xA1, 0x64, 0xEE, 0x35, 0x00, //mov eax, [0x35ee64]
+                                   0x8B, 0x80, 0x80, 0x07, 0x00, 0x00, //mov eax, [eax+0x780]
+                                   0x8B, 0x90, 0x10, 0x01, 0x00, 0x00, //mov edx, [eax+0x110]
+                                   0xC7, 0x45, 0xCC, 0x00, 0x00, 0x00, 0x00, //mov dword [ebp-0x34], 0x0
+                                   0xEB, 0x1E, //jmp short
+                                   0x8B, 0x42, 0x20, //mov eax, [edx+0x20]
+                                   0x84, 0xC0, //test al, al
+                                   0x75, 0x0C, //jnz short
+                                   0x83, 0x7A, 0x08, 0x04, //cmp dword [edx+0x8], 0x4
+                                   0x74, 0x1B, //jz short
+                                   0x83, 0x7A, 0x08, 0x05, //cmp dword [edx+0x8], 0x5
+                                   0x74, 0x15, //jz short
+                                   0x81, 0xC2, 0xEC, 0x00, 0x00, 0x00, //add edx, 0xec
+                                   0x8D, 0x45, 0xCC, //lea eax, [ebp-0x34]
+                                   0xFF, 0x00, //inc dword [eax]
+                                   0x8B, 0x45, 0xC8, //mov eax, [ebp-0x38]
+                                   0x3B, 0x45, 0xCC, //cmp eax, [ebp-0x34]
+                                   0x7F, 0xDA, //jg short
+                                   0xC9, //leave
+                                   0xC3 //ret
+        };
+        CodeInject(on, 0xB42A1, ar, 7);
+        if (on)
+            WriteMemory({0x90, 0x90}, 0xB48DC);
+        else
+            WriteMemory({0x75, 0x0B}, 0xB48DC);
+    }
+}
+
+void PvZ::LockPortal(bool on) {
+    if (isGameOn()) {
+        if (on) {
+            WriteMemory({0x90, 0x90, 0x90}, 0xB453D);
+            WriteMemory<byte>(0xEB, 0xB454B);
+        } else {
+            WriteMemory({0x89, 0x50, 0x58}, 0xB453D);
+            WriteMemory<byte>(0x75, 0xB454B);
+        }
     }
 }
 

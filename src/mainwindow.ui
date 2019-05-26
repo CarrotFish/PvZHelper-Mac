@@ -2082,6 +2082,19 @@
        </property>
       </item>
      </widget>
+     <widget class="QPushButton" name="ShowPortal">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>220</y>
+        <width>100</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>传送门修改</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_5">
      <attribute name="title">
