@@ -23,40 +23,6 @@ inline void PvZ::WriteMemory(std::initializer_list<byte> il, uintptr_t address) 
     memory.Write(address, il.size(), (void *) il.begin());
 }
 
-// template<size_t original_size, size_t size>
-// void PvZ::CodeInject(bool on, uint32_t address, std::array<byte, size> &ar) {
-//     uint32_t injected_code = 0;
-//     const int code_size = size + original_size + 5;
-//     if (on) {
-//         injected_code = (uint32_t) memory.Allocate(code_size, VM_PROT_ALL);
-//         if (injected_code) {
-//             uint32_t offset = injected_code - address - 5, offset2 =
-//                     address + original_size - injected_code - code_size;
-//
-//             std::array<byte, original_size> ar1{};
-//             ar1.fill(0x90);
-//             ar1[0] = 0xE9;
-//             memcpy(&ar1[1], &offset, 4);
-//
-//             auto ar2 = ReadMemory<byte, original_size>(address);
-//             std::array<byte, code_size> ar3{};
-//             memcpy(&ar3[0], &ar[0], size);
-//             memcpy(&ar3[size], &ar2[0], original_size);
-//             ar3[code_size - 5] = 0xE9;
-//             memcpy(&ar3[code_size - 4], &offset2, 4);
-//
-//             WriteMemory(ar3, injected_code);
-//             WriteMemory(ar1, address);
-//         }
-//     } else if (ReadMemory<byte>(address) == 0xE9) {
-//         auto offset = ReadMemory<uint32_t>(address + 1);
-//         injected_code = offset + address + 5;
-//         auto ar1 = ReadMemory<byte, original_size>(injected_code + size);
-//         WriteMemory(ar1, address);
-//         memory.Free(injected_code, code_size);
-//     }
-// }
-
 template<size_t size>
 void PvZ::CodeInject(bool on, uint32_t address, const std::array<byte, size> &ar, size_t original_size) {
     uint32_t injected_code = 0;
@@ -426,17 +392,6 @@ void PvZ::ModifyMode(int mode) {
 void PvZ::StartLevel(int mode) {
     if (isGameOn()) {
         if (CurGameUI() == 1) {
-            // code.asm_init();
-            // code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
-            // code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
-            // code.asm_call(0xB6C5C);
-            // code.asm_mov_dword_ptr_esp_add(0x8, 1);
-            // code.asm_mov_dword_ptr_esp_add(0x4, mode);
-            // code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
-            // code.asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
-            // code.asm_call(0xB79F4);
-            // code.asm_ret();
-            // code.asm_code_inject();
             WriteMemory<int>(mode, 0xC8F08);
             WriteMemory<byte>(0x80, 0xC8D4D);
             WriteMemory<bool>(true, base, 0x26C, 0x7C, 0xC0);
@@ -643,7 +598,6 @@ void PvZ::ColumnLike(bool on) {
 void PvZ::ModifySlotCount(int count) {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
         WriteMemory<int>(count, base, 0x780, 0x138, 0x24);
-        
         //Refresh card position
         //in game
         code.asm_init();
@@ -932,6 +886,8 @@ void PvZ::PutLadder(int row, int column) {
 
 void PvZ::PutGrave(int row, int column) {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
+        WriteMemory<bool>(true, base, 0x780, 0x5B8);
+        
         int row_count = CurRowCount();
         int col_count = 9;
         code.asm_init();
