@@ -380,9 +380,6 @@ private:
     
     void WriteMemory(std::initializer_list<byte> il, uintptr_t address);
     
-    template<size_t size>
-    void CodeInject(bool on, uint32_t address, const std::array<byte, size> &ar, size_t original_size);
-    
     int CurGameMode();
     
     int CurGameUI();

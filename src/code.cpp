@@ -16,7 +16,11 @@ Code::~Code() {
     delete[] code;
 }
 
-void Code::asm_init() {
+void Code::asm_init_codeinject() {
+    length = 0;
+}
+
+void Code::asm_init_newthread() {
     length = 23;                            //check the flag && set flag
     asm_mov_dword_ptr_exx(0x0, Reg::EAX);   //back up registers
     asm_mov_dword_ptr_exx(0x0, Reg::EBX);
@@ -208,8 +212,53 @@ void Code::asm_ret() {
 //         } else usleep(10000);
 //     }
 // }
+void Code::asm_code_inject(bool on, uint32_t address, size_t original_size) {
+    assert(original_size >= 5);
+    
+    uint32_t injected_code = 0;
+    const int code_size = length + original_size + 5;
+    if (on) {
+        injected_code = (uint32_t) _memory.Allocate(code_size, VM_PROT_ALL);
 
-void Code::asm_code_inject() {
+#ifndef NDEBUG
+        qDebug() << injected_code;
+#endif
+        
+        if (injected_code) {
+            uint32_t offset = injected_code - address - 5,
+                    offset2 = address + original_size - injected_code - code_size;
+            //new code to replace the original one
+            auto ar1 = new unsigned char[original_size];
+            memset(ar1, 0x90, original_size);
+            ar1[0] = 0xE9;
+            memcpy(&ar1[1], &offset, 4);
+            //the original code
+            auto ar2 = new unsigned char[original_size];
+            _memory.Read(address, original_size, ar2);
+            //code to inject
+            auto ar3 = new unsigned char[code_size];
+            memcpy(ar3, &code[0], length);
+            memcpy(&ar3[length], ar2, original_size);
+            ar3[code_size - 5] = 0xE9;
+            memcpy(&ar3[code_size - 4], &offset2, 4);
+            
+            _memory.Write(injected_code, code_size, ar3);
+            _memory.Write(address, original_size, ar1);
+            delete[] ar1;
+            delete[] ar2;
+            delete[] ar3;
+        }
+    } else if (_memory.Read<unsigned char>(address) == 0xE9) {
+        injected_code = _memory.Read<uint32_t>(address + 1) + address + 5;
+        auto ar1 = new unsigned char[original_size];
+        _memory.Read(injected_code + length, original_size, ar1);
+        _memory.Write(address, original_size, ar1);
+        _memory.Free(injected_code, code_size);
+        delete[] ar1;
+    }
+}
+
+void Code::asm_create_thread() {
     int addr = 0x26C710; //0x2E0FE;
     for (int i = 0; i < 100; i++) {
         if (_memory.Read<unsigned char>(addr) == 0xE9)
