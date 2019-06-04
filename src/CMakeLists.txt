@@ -13,13 +13,10 @@ find_package(Qt5Widgets)
 add_executable(PvZHelper
         main.cpp
         mainwindow.cpp
-        ProcessCore.cpp
-        ProcessMemory.cpp
-        ProcessModules.cpp
-        xnumem.cpp
+        memory.cpp
+        pvz.cpp
         code.cpp
         list.cpp
-        pvz.cpp
         portal.cpp)
 
 qt5_use_modules(PvZHelper Widgets)

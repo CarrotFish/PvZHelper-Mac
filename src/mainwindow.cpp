@@ -18,8 +18,7 @@
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow), SpawnTable(new QTableWidget(this)), PortalWindow(new Portal(this)),
-        pvz(new PvZ(ui, this)),
-        list(new List) {
+        pvz(new PvZ(ui, this)), list(new List) {
     SpawnTable->hide();
     PortalWindow->hide();
     ui->setupUi(this);

@@ -1,6 +1,7 @@
 #ifndef CODE_H
 #define CODE_H
 
+#include "memory.h"
 #include <cstddef>
 #include <cstdint>
 
@@ -21,13 +22,13 @@ class Code {
     friend class xnu_proc;
 
 public:
-    explicit Code(class xnu_proc &process);
+    explicit Code(Memory &memory);
     
     ~Code();
     
-    void asm_init_codeinject();
+    void asm_init_codeInject();
     
-    void asm_init_newthread();
+    void asm_init_newThread();
     
     void asm_add_byte(unsigned char);
     
@@ -86,11 +87,7 @@ protected:
     unsigned int length;
 
 private:
-    class xnu_proc& _process;
-    
-    class ProcessCore& _core;
-    
-    class ProcessMemory& _memory;
+    Memory &memory;
 };
 
 #endif

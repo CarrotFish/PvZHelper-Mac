@@ -4,7 +4,8 @@
 #include <QObject>
 #include <array>
 #include <initializer_list>
-#include "xnumem.h"
+#include "memory.h"
+#include "code.h"
 
 typedef uint8_t byte;
 
@@ -411,9 +412,8 @@ private:
     void CustomizeSpawn(std::array<bool, 33> &zombies, bool simulate, bool limit_flag, bool limit_yeti,
                         bool limit_bungee, bool limit_giga, std::array<bool, 20> &giga_waves);
     
-    xnu_proc *GameProc;
-    ProcessMemory &memory;
-    Code &code;
+    Memory memory;
+    Code code;
     pid_t pid = 0;
     const uint32_t base = 0x35EE64;
     const std::string ProcessName = "Plants vs. Zombi";
