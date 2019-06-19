@@ -15,6 +15,8 @@ class List;
 
 class Portal;
 
+class TargetMap;
+
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
@@ -151,6 +153,14 @@ signals:
     
     void LawnMowersDisappear();
     
+    void ClearAllPlants();
+    
+    void ClearAllZombies();
+    
+    void ClearAllItems();
+    
+    void ClearAllGridItems(int type);
+    
     void SetBlackPortal(int row_1, int column_1, int row_2, int column_2);
     
     void SetWhitePortal(int row_1, int column_1, int row_2, int column_2);
@@ -159,13 +169,9 @@ signals:
     
     void LockPortal(bool on);
     
-    void ClearAllPlants();
+    void GetTargetMap(int level);
     
-    void ClearAllZombies();
-    
-    void ClearAllItems();
-    
-    void ClearAllGridItems(int type);
+    void SetTargetMap(int level, const std::array<int, 54> &targetMap);
     
     void ModifyPlantHP(int type, int value);
     
@@ -342,6 +348,8 @@ public slots:
     
     void ShowCardProperty(int cost, int cooldowntime);
     
+    void ShowTargetMap(const std::array<int, 54> &targetMap);
+    
     void ShowPlantHP(int value);
     
     void ShowPlantAttackInterval(int value);
@@ -390,6 +398,7 @@ private:
     Ui::MainWindow *ui;
     QTableWidget *SpawnTable;
     Portal *PortalWindow;
+    TargetMap *TargetMapWindow;
     PvZ *pvz;
     List *list;
 protected:
@@ -401,7 +410,6 @@ protected:
     
     std::array<bool, 33> GetZombies() const;
     
-    std::array<bool, 20> GetGigaWaves() const;
 };
 
 #endif // MAINWINDOW_H

@@ -2087,12 +2087,25 @@
        <rect>
         <x>330</x>
         <y>220</y>
-        <width>100</width>
+        <width>110</width>
         <height>30</height>
        </rect>
       </property>
       <property name="text">
        <string>传送门修改</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="ShowTargetMap">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>185</y>
+        <width>110</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>目标地图修改</string>
       </property>
      </widget>
     </widget>

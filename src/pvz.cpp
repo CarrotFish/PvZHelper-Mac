@@ -1,5 +1,6 @@
 #include "pvz.h"
 #include "mainwindow.h"
+#include <array>
 #include <ctime>
 #include <random>
 #include <unistd.h>
@@ -20,6 +21,11 @@ inline void PvZ::WriteMemory(T value, Args... address) {
     memory.WriteMemory<T>(value, {static_cast<uintptr_t>(address)...});
 }
 
+template<typename T, size_t size, typename... Args>
+void PvZ::WriteMemory(std::array<T, size> value, Args... address) {
+    memory.WriteMemory<T, size>(value, {static_cast<uintptr_t>(address)...});
+}
+
 inline void PvZ::WriteMemory(std::initializer_list<byte> il, uintptr_t address) {
     memory.Write(address, il.size(), (void *) il.begin());
 }
@@ -38,6 +44,8 @@ PvZ::PvZ(Ui::MainWindow *ui, MainWindow *MainWindow) : ui(ui), window(MainWindow
     connect(this, &PvZ::CardOthers, window, &MainWindow::DisableCost);
     connect(this, &PvZ::CardOthers, window, &MainWindow::DisableCooldownTime);
     connect(this, &PvZ::CardProperty, window, &MainWindow::ShowCardProperty);
+    
+    connect(this, &PvZ::TargetMap, window, &MainWindow::ShowTargetMap);
     
     connect(this, &PvZ::PlantHP, window, &MainWindow::ShowPlantHP);
     connect(this, &PvZ::PlantAttackInterval, window, &MainWindow::ShowPlantAttackInterval);
@@ -1133,6 +1141,76 @@ void PvZ::LawnMowersDisappear() {
     }
 }
 
+void PvZ::ClearAllPlants() {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
+        auto plant_count_max = ReadMemory<uint32_t>(base, 0x780, 0xA4);
+        auto plant_offset = ReadMemory<uint32_t>(base, 0x780, 0xA0);
+        
+        code.asm_init_newThread();
+        for (size_t i = 0; i < plant_count_max; i++) {
+            auto plant_existing = ReadMemory<uint16_t>(plant_offset + 0x14A + 0x14C * i);
+            auto plant_disappeared = ReadMemory<bool>(plant_offset + 0x141 + 0x14C * i);
+            auto plant_crushed = ReadMemory<bool>(plant_offset + 0x142 + 0x14C * i);
+            if (plant_existing && !plant_disappeared && !plant_crushed) {
+                uint32_t addr = plant_offset + 0x14C * i;
+                code.asm_mov_dword_ptr_esp_add(0x0, addr);
+                code.asm_call(0x37522);
+            }
+        }
+        code.asm_ret();
+        code.asm_create_thread();
+    }
+}
+
+void PvZ::ClearAllZombies() {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
+        auto zombie_count_max = ReadMemory<uint32_t>(base, 0x780, 0x88);
+        auto zombie_offset = ReadMemory<uint32_t>(base, 0x780, 0x84);
+        
+        code.asm_init_newThread();
+        for (size_t i = 0; i < zombie_count_max; i++) {
+            auto zombie_existing = ReadMemory<uint16_t>(zombie_offset + 0x166 + 0x168 * i);
+            auto zombie_disappeared = ReadMemory<bool>(zombie_offset + 0xEC + 0x168 * i);
+            if (zombie_existing && !zombie_disappeared) {
+                uint32_t addr = zombie_offset + 0x168 * i;
+                code.asm_mov_dword_ptr_esp_add(0x0, addr);
+                code.asm_call(0xE3AC2);
+            }
+        }
+        code.asm_ret();
+        code.asm_create_thread();
+    }
+}
+
+void PvZ::ClearAllItems() {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
+        WriteMemory({0x90, 0x90}, 0x2F3D2);//Can't find a good way...
+        usleep(10000);
+        WriteMemory({0x75, 0x18}, 0x2F3D2);
+    }
+}
+
+void PvZ::ClearAllGridItems(int type) {
+    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
+        auto griditem_count_max = ReadMemory<uint32_t>(base, 0x780, 0x114);
+        auto griditem_offset = ReadMemory<uint32_t>(base, 0x780, 0x110);
+        
+        code.asm_init_newThread();
+        for (size_t i = 0; i < griditem_count_max; i++) {
+            auto griditem_existing = ReadMemory<uint16_t>(griditem_offset + 0xEA + 0xEC * i);
+            auto griditem_disappeared = ReadMemory<bool>(griditem_offset + 0x20 + 0xEC * i);
+            auto griditem_type = ReadMemory<int>(griditem_offset + 0x8 + 0xEC * i);
+            if (griditem_existing && !griditem_disappeared && griditem_type == type) {
+                uint32_t addr = griditem_offset + 0xEC * i;
+                code.asm_mov_dword_ptr_esp_add(0x0, addr);
+                code.asm_call(0x207090);
+            }
+        }
+        code.asm_ret();
+        code.asm_create_thread();
+    }
+}
+
 void PvZ::SetBlackPortal(int row_1, int column_1, int row_2, int column_2) {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
         if (ReadMemory<int>(base, 0x780, 0x154, 0x58) == 0)
@@ -1211,73 +1289,27 @@ void PvZ::LockPortal(bool on) {
     }
 }
 
-void PvZ::ClearAllPlants() {
-    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
-        auto plant_count_max = ReadMemory<uint32_t>(base, 0x780, 0xA4);
-        auto plant_offset = ReadMemory<uint32_t>(base, 0x780, 0xA0);
-        
-        code.asm_init_newThread();
-        for (size_t i = 0; i < plant_count_max; i++) {
-            auto plant_existing = ReadMemory<uint16_t>(plant_offset + 0x14A + 0x14C * i);
-            auto plant_disappeared = ReadMemory<bool>(plant_offset + 0x141 + 0x14C * i);
-            auto plant_crushed = ReadMemory<bool>(plant_offset + 0x142 + 0x14C * i);
-            if (plant_existing && !plant_disappeared && !plant_crushed) {
-                uint32_t addr = plant_offset + 0x14C * i;
-                code.asm_mov_dword_ptr_esp_add(0x0, addr);
-                code.asm_call(0x37522);
-            }
-        }
-        code.asm_ret();
-        code.asm_create_thread();
+void PvZ::GetTargetMap(int level) {
+    if (isGameOn()) {
+        std::array<int, 54> targetMap{};
+        if (level == 22)             //Seeing Stars
+            targetMap = ReadMemory<int, 54>(0x35EBC0);
+        else if (level == 36)        //Art Challenge Wall-nut
+            targetMap = ReadMemory<int, 54>(0x35ED80);
+        else if (level == 40)        //Art Challenge Sunflower
+            targetMap = ReadMemory<int, 54>(0x35ECA0);
+        emit TargetMap(targetMap);
     }
 }
 
-void PvZ::ClearAllZombies() {
-    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
-        auto zombie_count_max = ReadMemory<uint32_t>(base, 0x780, 0x88);
-        auto zombie_offset = ReadMemory<uint32_t>(base, 0x780, 0x84);
-        
-        code.asm_init_newThread();
-        for (size_t i = 0; i < zombie_count_max; i++) {
-            auto zombie_existing = ReadMemory<uint16_t>(zombie_offset + 0x166 + 0x168 * i);
-            auto zombie_disappeared = ReadMemory<bool>(zombie_offset + 0xEC + 0x168 * i);
-            if (zombie_existing && !zombie_disappeared) {
-                uint32_t addr = zombie_offset + 0x168 * i;
-                code.asm_mov_dword_ptr_esp_add(0x0, addr);
-                code.asm_call(0xE3AC2);
-            }
-        }
-        code.asm_ret();
-        code.asm_create_thread();
-    }
-}
-
-void PvZ::ClearAllItems() {
-    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
-        WriteMemory({0x90, 0x90}, 0x2F3D2);//Can't find a good way...
-        usleep(10000);
-        WriteMemory({0x75, 0x18}, 0x2F3D2);
-    }
-}
-
-void PvZ::ClearAllGridItems(int type) {
-    if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
-        auto griditem_count_max = ReadMemory<uint32_t>(base, 0x780, 0x114);
-        auto griditem_offset = ReadMemory<uint32_t>(base, 0x780, 0x110);
-        
-        code.asm_init_newThread();
-        for (size_t i = 0; i < griditem_count_max; i++) {
-            auto griditem_existing = ReadMemory<uint16_t>(griditem_offset + 0xEA + 0xEC * i);
-            auto griditem_disappeared = ReadMemory<bool>(griditem_offset + 0x20 + 0xEC * i);
-            auto griditem_type = ReadMemory<int>(griditem_offset + 0x8 + 0xEC * i);
-            if (griditem_existing && !griditem_disappeared && griditem_type == type) {
-                uint32_t addr = griditem_offset + 0xEC * i;
-                code.asm_mov_dword_ptr_esp_add(0x0, addr);
-                code.asm_call(0x207090);
-            }
-        }
-        code.asm_ret();
-        code.asm_create_thread();
+void PvZ::SetTargetMap(int level, const std::array<int, 54> &targetMap) {
+    if (isGameOn()) {
+        if (level == 22)             //Seeing Stars
+            WriteMemory(targetMap, 0x35EBC0);
+        else if (level == 36)        //Art Challenge Wall-nut
+            WriteMemory(targetMap, 0x35ED80);
+        else if (level == 40)        //Art Challenge Sunflower
+            WriteMemory(targetMap, 0x35ECA0);
     }
 }
 

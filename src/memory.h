@@ -91,6 +91,19 @@ public:
             else
                 Write(offset + *it, sizeof(value), &value);
     }
+    
+    template<typename T, size_t size>
+    void WriteMemory(std::array<T, size> value, std::initializer_list<uintptr_t> addr) {
+        T buff[size];
+        for (size_t i = 0; i < size; i++)
+            buff[i] = value[i];
+        uintptr_t offset = 0;
+        for (auto it = addr.begin(); it != addr.end(); it++)
+            if (it != addr.end() - 1)
+                Read(offset + *it, sizeof(uint32_t), &offset);
+            else
+                Write(offset + *it, sizeof(buff), &buff);
+    }
 
 private:
     int Open();

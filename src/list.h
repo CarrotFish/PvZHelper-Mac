@@ -6,7 +6,9 @@ class List{
 public:
     List();
     QStringList PlantsList;
+    QStringList PlantsShortList;
     QStringList ZombiesList;
+    QStringList ZombiesShortList;
     QStringList CardList;
     QStringList ResourceList;
     QStringList MapList;

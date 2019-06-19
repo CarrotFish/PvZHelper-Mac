@@ -2,7 +2,6 @@
 #define PVZ_H
 
 #include <QObject>
-#include <array>
 #include <initializer_list>
 #include "memory.h"
 #include "code.h"
@@ -37,6 +36,8 @@ signals:
     void CardOthers();
     
     void CardProperty(int cost, int cooldowntime);
+    
+    void TargetMap(const std::array<int, 54> &targetMap);
     
     void PlantHP(int value);
     
@@ -197,6 +198,14 @@ public slots:
     
     void LawnMowersDisappear();
     
+    void ClearAllPlants();
+    
+    void ClearAllZombies();
+    
+    void ClearAllItems();
+    
+    void ClearAllGridItems(int type);
+    
     void SetBlackPortal(int row_1, int column_1, int row_2, int column_2);
     
     void SetWhitePortal(int row_1, int column_1, int row_2, int column_2);
@@ -205,13 +214,9 @@ public slots:
     
     void LockPortal(bool on);
     
-    void ClearAllPlants();
+    void GetTargetMap(int level);
     
-    void ClearAllZombies();
-    
-    void ClearAllItems();
-    
-    void ClearAllGridItems(int type);
+    void SetTargetMap(int level, const std::array<int, 54> &targetMap);
 
 //Plants
     
@@ -378,6 +383,9 @@ private:
     
     template<typename T, typename... Args>
     void WriteMemory(T value, Args... address);
+    
+    template<typename T, size_t size, typename... Args>
+    void WriteMemory(std::array<T, size> value, Args... address);
     
     void WriteMemory(std::initializer_list<byte> il, uintptr_t address);
     

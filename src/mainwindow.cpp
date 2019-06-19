@@ -3,6 +3,7 @@
 #include "list.h"
 #include "pvz.h"
 #include "window.h"
+#include <array>
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QTimer>
@@ -18,9 +19,10 @@
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow), SpawnTable(new QTableWidget(this)), PortalWindow(new Portal(this)),
-        pvz(new PvZ(ui, this)), list(new List) {
+        TargetMapWindow(new TargetMap(this)), pvz(new PvZ(ui, this)), list(new List) {
     SpawnTable->hide();
     PortalWindow->hide();
+    TargetMapWindow->hide();
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
                    Qt::WindowMinimizeButtonHint);
@@ -49,6 +51,9 @@ void MainWindow::ConnectWidgets() {
     });
     connect(showPortal, &QAction::triggered, this, [=]() {
         PortalWindow->show();
+    });
+    connect(showTargetMap, &QAction::triggered, this, [=]() {
+        TargetMapWindow->show();
     });
     connect(showHelp, &QAction::triggered, this, &MainWindow::ShowHelpWindow);
     connect(showAbout, &QAction::triggered, this, &MainWindow::ShowAboutWindow);
@@ -255,9 +260,6 @@ void MainWindow::ConnectWidgets() {
     connect(ui->LawnMowerStart, &QPushButton::clicked, this, &MainWindow::LawnMowersStart);
     connect(ui->LawnMowerReset, &QPushButton::clicked, this, &MainWindow::LawnMowersReset);
     connect(ui->LawnMowerDisappear, &QPushButton::clicked, this, &MainWindow::LawnMowersDisappear);
-    connect(ui->ShowPortal, &QPushButton::clicked, this, [=]() {
-        PortalWindow->show();
-    });
     connect(ui->ClearAll, &QPushButton::clicked, this, [=]() {
         int type = ui->ObjectType->currentIndex();
         switch (type) {
@@ -297,6 +299,12 @@ void MainWindow::ConnectWidgets() {
             default:
                 break;
         }
+    });
+    connect(ui->ShowPortal, &QPushButton::clicked, this, [=]() {
+        PortalWindow->show();
+    });
+    connect(ui->ShowTargetMap, &QPushButton::clicked, this, [=]() {
+        TargetMapWindow->show();
     });
     //Page 5
     connect(ui->ModifyPlantHP, &QPushButton::clicked, this, [=]() {
@@ -521,53 +529,19 @@ void MainWindow::ConnectWidgets() {
         }
     });
     connect(ui->LimitGiga_2, &QRadioButton::toggled, this, [=](bool on) {
-        if (on) {
-            ui->GigaWave_0->setDisabled(false);
-            ui->GigaWave_1->setDisabled(false);
-            ui->GigaWave_2->setDisabled(false);
-            ui->GigaWave_3->setDisabled(false);
-            ui->GigaWave_4->setDisabled(false);
-            ui->GigaWave_5->setDisabled(false);
-            ui->GigaWave_6->setDisabled(false);
-            ui->GigaWave_7->setDisabled(false);
-            ui->GigaWave_8->setDisabled(false);
-            ui->GigaWave_9->setDisabled(false);
-            ui->GigaWave_10->setDisabled(false);
-            ui->GigaWave_11->setDisabled(false);
-            ui->GigaWave_12->setDisabled(false);
-            ui->GigaWave_13->setDisabled(false);
-            ui->GigaWave_14->setDisabled(false);
-            ui->GigaWave_15->setDisabled(false);
-            ui->GigaWave_16->setDisabled(false);
-            ui->GigaWave_17->setDisabled(false);
-            ui->GigaWave_18->setDisabled(false);
-            ui->GigaWave_19->setDisabled(false);
-        } else {
-            ui->GigaWave_0->setDisabled(true);
-            ui->GigaWave_1->setDisabled(true);
-            ui->GigaWave_2->setDisabled(true);
-            ui->GigaWave_3->setDisabled(true);
-            ui->GigaWave_4->setDisabled(true);
-            ui->GigaWave_5->setDisabled(true);
-            ui->GigaWave_6->setDisabled(true);
-            ui->GigaWave_7->setDisabled(true);
-            ui->GigaWave_8->setDisabled(true);
-            ui->GigaWave_9->setDisabled(true);
-            ui->GigaWave_10->setDisabled(true);
-            ui->GigaWave_11->setDisabled(true);
-            ui->GigaWave_12->setDisabled(true);
-            ui->GigaWave_13->setDisabled(true);
-            ui->GigaWave_14->setDisabled(true);
-            ui->GigaWave_15->setDisabled(true);
-            ui->GigaWave_16->setDisabled(true);
-            ui->GigaWave_17->setDisabled(true);
-            ui->GigaWave_18->setDisabled(true);
-            ui->GigaWave_19->setDisabled(true);
+        auto GigaWaves = ui->tab_10->findChildren<QCheckBox *>(QRegularExpression("GigaWave_.*"));
+        for (auto giga_wave:GigaWaves) {
+            giga_wave->setDisabled(!on);
         }
     });
     connect(ui->SetSpawn, &QPushButton::clicked, this, [=]() {
         std::array<bool, 33> zombies = {false};
-        std::array<bool, 20> giga_waves = GetGigaWaves();
+        std::array<bool, 20> giga_waves = {false};
+        auto gigaWaves = ui->tab_10->findChildren<QCheckBox *>(QRegularExpression("GigaWave_.*"));
+        for (auto gigaWave:gigaWaves) {
+            int id = gigaWave->objectName().remove("GigaWave_").toInt();
+            giga_waves[id] = gigaWave->isChecked();
+        }
         for (int i = 0; i < ui->SpawnList->count(); i++) {
             zombies[list->ZombiesList.indexOf(ui->SpawnList->item(i)->text())] = true;
         }
@@ -589,26 +563,12 @@ void MainWindow::ConnectWidgets() {
         std::array<bool, 33> zombies = {false};
         for (int i = 0; i < ui->SpawnList->count(); i++)
             zombies[list->ZombiesList.indexOf(ui->SpawnList->item(i)->text())] = true;
-        ui->SpawnType_0->setChecked(zombies[2]);
-        ui->SpawnType_1->setChecked(zombies[3]);
-        ui->SpawnType_2->setChecked(zombies[4]);
-        ui->SpawnType_3->setChecked(zombies[5]);
-        ui->SpawnType_4->setChecked(zombies[6]);
-        ui->SpawnType_5->setChecked(zombies[7]);
-        ui->SpawnType_6->setChecked(zombies[8]);
-        ui->SpawnType_7->setChecked(zombies[11]);
-        ui->SpawnType_8->setChecked(zombies[12]);
-        ui->SpawnType_9->setChecked(zombies[14]);
-        ui->SpawnType_10->setChecked(zombies[15]);
-        ui->SpawnType_11->setChecked(zombies[16]);
-        ui->SpawnType_12->setChecked(zombies[17]);
-        ui->SpawnType_13->setChecked(zombies[18]);
-        ui->SpawnType_14->setChecked(zombies[19]);
-        ui->SpawnType_15->setChecked(zombies[20]);
-        ui->SpawnType_16->setChecked(zombies[21]);
-        ui->SpawnType_17->setChecked(zombies[22]);
-        ui->SpawnType_18->setChecked(zombies[23]);
-        ui->SpawnType_19->setChecked(zombies[32]);
+        auto spawnTypes = ui->tab_7->findChildren<QCheckBox *>(QRegularExpression("SpawnType_.*"));
+        int index[20] = {2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 32};
+        for (auto &spawn:spawnTypes) {
+            int id = spawn->objectName().remove("SpawnType_").toInt();
+            spawn->setChecked(zombies[index[id]]);
+        }
         ui->tabWidget->removeTab(7);
         ui->tabWidget->removeTab(8);
         ui->tabWidget->removeTab(9);
@@ -783,14 +743,16 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::LawnMowersStart, pvz, &PvZ::LawnMowersStart);
     connect(this, &MainWindow::LawnMowersReset, pvz, &PvZ::LawnMowersReset);
     connect(this, &MainWindow::LawnMowersDisappear, pvz, &PvZ::LawnMowersDisappear);
-    connect(this, &MainWindow::SetBlackPortal, pvz, &PvZ::SetBlackPortal);
-    connect(this, &MainWindow::SetWhitePortal, pvz, &PvZ::SetWhitePortal);
-    connect(this, &MainWindow::ActivePortal, pvz, &PvZ::ActivePortal);
-    connect(this, &MainWindow::LockPortal, pvz, &PvZ::LockPortal);
     connect(this, &MainWindow::ClearAllPlants, pvz, &PvZ::ClearAllPlants);
     connect(this, &MainWindow::ClearAllZombies, pvz, &PvZ::ClearAllZombies);
     connect(this, &MainWindow::ClearAllItems, pvz, &PvZ::ClearAllItems);
     connect(this, &MainWindow::ClearAllGridItems, pvz, &PvZ::ClearAllGridItems);
+    connect(this, &MainWindow::SetBlackPortal, pvz, &PvZ::SetBlackPortal);
+    connect(this, &MainWindow::SetWhitePortal, pvz, &PvZ::SetWhitePortal);
+    connect(this, &MainWindow::ActivePortal, pvz, &PvZ::ActivePortal);
+    connect(this, &MainWindow::LockPortal, pvz, &PvZ::LockPortal);
+    connect(this, &MainWindow::GetTargetMap, pvz, &PvZ::GetTargetMap);
+    connect(this, &MainWindow::SetTargetMap, pvz, &PvZ::SetTargetMap);
     
     connect(this, &MainWindow::ModifyPlantHP, pvz, &PvZ::ModifyPlantHP);
     connect(this, &MainWindow::GetPlantHP, pvz, &PvZ::GetPlantHP);
@@ -968,6 +930,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         PortalWindow->RestoreChanges();
     }
     delete PortalWindow;
+    delete TargetMapWindow;
     event->accept();
 }
 
@@ -1071,6 +1034,10 @@ void MainWindow::ShowCardProperty(int cost, int cooldowntime) {
     ui->CardCooldownTime->setText(QString::number(cooldowntime));
 }
 
+void MainWindow::ShowTargetMap(const std::array<int, 54> &targetMap) {
+    TargetMapWindow->ShowTargetMap(targetMap);
+}
+
 void MainWindow::ShowPlantHP(int value) {
     ui->PlantHP->setText(QString::number(value));
 }
@@ -1089,8 +1056,7 @@ void MainWindow::ShowZombieHP(int value) {
 
 std::array<bool, 33> MainWindow::GetZombies() const {
     std::array<bool, 33> zombies = {false};
-    auto SpawnTab = ui->tabWidget->widget(7);
-    auto SpawnType = SpawnTab->findChildren<QCheckBox *>(QRegularExpression("SpawnType_.*"));
+    auto SpawnType = ui->tab_7->findChildren<QCheckBox *>(QRegularExpression("SpawnType_.*"));
     int index[20] = {2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 32};
     zombies[0] = true;
     zombies[1] = true;
@@ -1099,17 +1065,6 @@ std::array<bool, 33> MainWindow::GetZombies() const {
         zombies[index[id]] = spawn->isChecked();
     }
     return zombies;
-}
-
-std::array<bool, 20> MainWindow::GetGigaWaves() const {
-    std::array<bool, 20> giga_waves = {false};
-    auto SpawnTab2 = ui->tabWidget->widget(7);
-    auto GigaWaves = SpawnTab2->findChildren<QCheckBox *>(QRegularExpression("GigaWave_.*"));
-    for (auto giga_wave:GigaWaves) {
-        int id = giga_wave->objectName().remove("GigaWave_").toInt();
-        giga_waves[id] = giga_wave->isChecked();
-    }
-    return giga_waves;
 }
 
 void MainWindow::UpdateSpawnTable(const std::array<int, 33> &zombies_count) {
@@ -1159,8 +1114,7 @@ void MainWindow::ClearSpawnTable() {
 }
 
 void MainWindow::UpdateGigaWaves(const std::array<bool, 20> &giga_waves) {
-    auto SpawnTab2 = ui->tabWidget->widget(7);
-    auto GigaWaves = SpawnTab2->findChildren<QCheckBox *>(QRegularExpression("GigaWave_.*"));
+    auto GigaWaves = ui->tab_10->findChildren<QCheckBox *>(QRegularExpression("GigaWave_.*"));
     for (auto giga_wave:GigaWaves) {
         int id = giga_wave->objectName().remove("GigaWave_").toInt();
         giga_wave->setChecked(giga_waves[id]);
