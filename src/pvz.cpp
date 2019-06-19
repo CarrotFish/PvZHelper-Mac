@@ -1215,7 +1215,7 @@ void PvZ::ClearAllPlants() {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
         auto plant_count_max = ReadMemory<uint32_t>(base, 0x780, 0xA4);
         auto plant_offset = ReadMemory<uint32_t>(base, 0x780, 0xA0);
-    
+        
         code.asm_init_newThread();
         for (size_t i = 0; i < plant_count_max; i++) {
             auto plant_existing = ReadMemory<uint16_t>(plant_offset + 0x14A + 0x14C * i);
@@ -1236,7 +1236,7 @@ void PvZ::ClearAllZombies() {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
         auto zombie_count_max = ReadMemory<uint32_t>(base, 0x780, 0x88);
         auto zombie_offset = ReadMemory<uint32_t>(base, 0x780, 0x84);
-    
+        
         code.asm_init_newThread();
         for (size_t i = 0; i < zombie_count_max; i++) {
             auto zombie_existing = ReadMemory<uint16_t>(zombie_offset + 0x166 + 0x168 * i);
@@ -1264,7 +1264,7 @@ void PvZ::ClearAllGridItems(int type) {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
         auto griditem_count_max = ReadMemory<uint32_t>(base, 0x780, 0x114);
         auto griditem_offset = ReadMemory<uint32_t>(base, 0x780, 0x110);
-    
+        
         code.asm_init_newThread();
         for (size_t i = 0; i < griditem_count_max; i++) {
             auto griditem_existing = ReadMemory<uint16_t>(griditem_offset + 0xEA + 0xEC * i);
@@ -1880,7 +1880,7 @@ void PvZ::UpdateZombiesPreview() {
     WriteMemory<byte>(0x85, 0xFB004);
 }
 
-void PvZ::InternalSpawn(std::array<bool, 33> &zombies) {
+void PvZ::InternalSpawn(const std::array<bool, 33> &zombies) {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
         auto zombies_type_offset = ReadMemory<uint32_t>(base, 0x780) + 0x54C8;
         auto zombies_list_offset = ReadMemory<uint32_t>(base, 0x780) + 0x6A8;
@@ -1927,8 +1927,8 @@ void PvZ::InternalSpawn(std::array<bool, 33> &zombies) {
     GetSpawnList();
 }
 
-void PvZ::CustomizeSpawn(std::array<bool, 33> &zombies, bool simulate, bool limit_flag, bool limit_yeti,
-                         bool limit_bungee, bool limit_giga, std::array<bool, 20> &giga_waves) {
+void PvZ::CustomizeSpawn(const std::array<bool, 33> &zombies, bool simulate, bool limit_flag, bool limit_yeti,
+                         bool limit_bungee, bool limit_giga, const std::array<bool, 20> &giga_waves) {
     if (isGameOn() && (CurGameUI() == 2 || CurGameUI() == 3)) {
         auto *zombies_list = new std::array<uint32_t, 2000>;
         std::fill((*zombies_list).begin(), (*zombies_list).end(), 0);
@@ -2025,17 +2025,17 @@ void PvZ::CustomizeSpawn(std::array<bool, 33> &zombies, bool simulate, bool limi
     }
 }
 
-void PvZ::NaturalSpawn(std::array<bool, 33> &zombies) {
+void PvZ::NaturalSpawn(const std::array<bool, 33> &zombies) {
     InternalSpawn(zombies);
 }
 
-void PvZ::SimulateSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
-                        bool limit_giga, std::array<bool, 20> &giga_waves) {
+void PvZ::SimulateSpawn(const std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
+                        bool limit_giga, const std::array<bool, 20> &giga_waves) {
     CustomizeSpawn(zombies, true, limit_flag, limit_yeti, limit_bungee, limit_giga, giga_waves);
 }
 
-void PvZ::ExtremeSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
-                       bool limit_giga, std::array<bool, 20> &giga_waves) {
+void PvZ::ExtremeSpawn(const std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
+                       bool limit_giga, const std::array<bool, 20> &giga_waves) {
     CustomizeSpawn(zombies, false, limit_flag, limit_yeti, limit_bungee, limit_giga, giga_waves);
 }
 
@@ -2207,10 +2207,13 @@ void PvZ::DisablePause(bool on) {
 
 void PvZ::NoDataDelete(bool on) {
     if (isGameOn()) {
-        if (on)
+        if (on) {
             WriteMemory({0x31, 0xC9}, 0xD936);
-        else
+            WriteMemory({0x31, 0xC9}, 0x221ED);
+        } else {
             WriteMemory({0x89, 0xC1}, 0xD936);
+            WriteMemory({0x89, 0xC1}, 0x221ED);
+        }
     }
 }
 

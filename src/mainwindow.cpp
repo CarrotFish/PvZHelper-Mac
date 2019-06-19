@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include "list.h"
 #include "pvz.h"
-#include "portal.h"
+#include "window.h"
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QTimer>
@@ -34,12 +34,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::ConnectWidgets() {
     auto MenuBar = menuBar();
+    auto toolMenu = MenuBar->addMenu("工具");
+    auto showPAK = toolMenu->addAction("PAK解包/打包");
+    auto showPortal = toolMenu->addAction("传送门修改");
+    auto showTargetMap = toolMenu->addAction("目标地图修改");
     auto helpMenu = MenuBar->addMenu("帮助");
     auto showHelp = helpMenu->addAction("使用说明");
     auto CheckUpdate = helpMenu->addAction("检查更新");
     helpMenu->addSeparator();
     auto showAbout = helpMenu->addAction("关于");
     auto showAboutQt = helpMenu->addAction("关于Qt");
+    connect(showPAK, &QAction::triggered, this, [=]() {
+        ui->tabWidget->setCurrentIndex(9);
+    });
+    connect(showPortal, &QAction::triggered, this, [=]() {
+        PortalWindow->show();
+    });
     connect(showHelp, &QAction::triggered, this, &MainWindow::ShowHelpWindow);
     connect(showAbout, &QAction::triggered, this, &MainWindow::ShowAboutWindow);
     connect(CheckUpdate, &QAction::triggered, this, [=]() {
@@ -1079,57 +1089,30 @@ void MainWindow::ShowZombieHP(int value) {
 
 std::array<bool, 33> MainWindow::GetZombies() const {
     std::array<bool, 33> zombies = {false};
+    auto SpawnTab = ui->tabWidget->widget(7);
+    auto SpawnType = SpawnTab->findChildren<QCheckBox *>(QRegularExpression("SpawnType_.*"));
+    int index[20] = {2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 32};
     zombies[0] = true;
     zombies[1] = true;
-    zombies[2] = ui->SpawnType_0->isChecked();
-    zombies[3] = ui->SpawnType_1->isChecked();
-    zombies[4] = ui->SpawnType_2->isChecked();
-    zombies[5] = ui->SpawnType_3->isChecked();
-    zombies[6] = ui->SpawnType_4->isChecked();
-    zombies[7] = ui->SpawnType_5->isChecked();
-    zombies[8] = ui->SpawnType_6->isChecked();
-    zombies[11] = ui->SpawnType_7->isChecked();
-    zombies[12] = ui->SpawnType_8->isChecked();
-    zombies[14] = ui->SpawnType_9->isChecked();
-    zombies[15] = ui->SpawnType_10->isChecked();
-    zombies[16] = ui->SpawnType_11->isChecked();
-    zombies[17] = ui->SpawnType_12->isChecked();
-    zombies[18] = ui->SpawnType_13->isChecked();
-    zombies[19] = ui->SpawnType_14->isChecked();
-    zombies[20] = ui->SpawnType_15->isChecked();
-    zombies[21] = ui->SpawnType_16->isChecked();
-    zombies[22] = ui->SpawnType_17->isChecked();
-    zombies[23] = ui->SpawnType_18->isChecked();
-    zombies[32] = ui->SpawnType_19->isChecked();
+    for (auto spawn:SpawnType) {
+        int id = spawn->objectName().remove("SpawnType_").toInt();
+        zombies[index[id]] = spawn->isChecked();
+    }
     return zombies;
 }
 
 std::array<bool, 20> MainWindow::GetGigaWaves() const {
-    std::array<bool, 20> giga_waves{};
-    giga_waves[0] = ui->GigaWave_0->isChecked();
-    giga_waves[1] = ui->GigaWave_1->isChecked();
-    giga_waves[2] = ui->GigaWave_2->isChecked();
-    giga_waves[3] = ui->GigaWave_3->isChecked();
-    giga_waves[4] = ui->GigaWave_4->isChecked();
-    giga_waves[5] = ui->GigaWave_5->isChecked();
-    giga_waves[6] = ui->GigaWave_6->isChecked();
-    giga_waves[7] = ui->GigaWave_7->isChecked();
-    giga_waves[8] = ui->GigaWave_8->isChecked();
-    giga_waves[9] = ui->GigaWave_9->isChecked();
-    giga_waves[10] = ui->GigaWave_10->isChecked();
-    giga_waves[11] = ui->GigaWave_11->isChecked();
-    giga_waves[12] = ui->GigaWave_12->isChecked();
-    giga_waves[13] = ui->GigaWave_13->isChecked();
-    giga_waves[14] = ui->GigaWave_14->isChecked();
-    giga_waves[15] = ui->GigaWave_15->isChecked();
-    giga_waves[16] = ui->GigaWave_16->isChecked();
-    giga_waves[17] = ui->GigaWave_17->isChecked();
-    giga_waves[18] = ui->GigaWave_18->isChecked();
-    giga_waves[19] = ui->GigaWave_19->isChecked();
+    std::array<bool, 20> giga_waves = {false};
+    auto SpawnTab2 = ui->tabWidget->widget(7);
+    auto GigaWaves = SpawnTab2->findChildren<QCheckBox *>(QRegularExpression("GigaWave_.*"));
+    for (auto giga_wave:GigaWaves) {
+        int id = giga_wave->objectName().remove("GigaWave_").toInt();
+        giga_waves[id] = giga_wave->isChecked();
+    }
     return giga_waves;
 }
 
-void MainWindow::UpdateSpawnTable(std::array<int, 33> &zombies_count) {
+void MainWindow::UpdateSpawnTable(const std::array<int, 33> &zombies_count) {
     int zombies_type_count = 0, total_count = std::accumulate(zombies_count.begin(), zombies_count.end(), 0);
     for (size_t i = 0; i < 33; i++)
         if (zombies_count[i] > 0)
@@ -1175,36 +1158,21 @@ void MainWindow::ClearSpawnTable() {
     SpawnTable->hide();
 }
 
-void MainWindow::UpdateGigaWaves(std::array<bool, 20> &giga_waves) {
-    ui->GigaWave_0->setChecked(giga_waves[0]);
-    ui->GigaWave_1->setChecked(giga_waves[1]);
-    ui->GigaWave_2->setChecked(giga_waves[2]);
-    ui->GigaWave_3->setChecked(giga_waves[3]);
-    ui->GigaWave_4->setChecked(giga_waves[4]);
-    ui->GigaWave_5->setChecked(giga_waves[5]);
-    ui->GigaWave_6->setChecked(giga_waves[6]);
-    ui->GigaWave_7->setChecked(giga_waves[7]);
-    ui->GigaWave_8->setChecked(giga_waves[8]);
-    ui->GigaWave_9->setChecked(giga_waves[9]);
-    ui->GigaWave_10->setChecked(giga_waves[10]);
-    ui->GigaWave_11->setChecked(giga_waves[11]);
-    ui->GigaWave_12->setChecked(giga_waves[12]);
-    ui->GigaWave_13->setChecked(giga_waves[13]);
-    ui->GigaWave_14->setChecked(giga_waves[14]);
-    ui->GigaWave_15->setChecked(giga_waves[15]);
-    ui->GigaWave_16->setChecked(giga_waves[16]);
-    ui->GigaWave_17->setChecked(giga_waves[17]);
-    ui->GigaWave_18->setChecked(giga_waves[18]);
-    ui->GigaWave_19->setChecked(giga_waves[19]);
+void MainWindow::UpdateGigaWaves(const std::array<bool, 20> &giga_waves) {
+    auto SpawnTab2 = ui->tabWidget->widget(7);
+    auto GigaWaves = SpawnTab2->findChildren<QCheckBox *>(QRegularExpression("GigaWave_.*"));
+    for (auto giga_wave:GigaWaves) {
+        int id = giga_wave->objectName().remove("GigaWave_").toInt();
+        giga_wave->setChecked(giga_waves[id]);
+    }
 }
 
 void MainWindow::ShowSeed(uint32_t seed) {
     ui->SpawnSeed->setText(QString("%1").arg(seed, 8, 16, QLatin1Char('0')).toUpper());
 }
 
-void MainWindow::OpenUserdataFolder(QString DataDir) {
-    DataDir = "file:" + DataDir;
-    QDesktopServices::openUrl(QUrl(DataDir, QUrl::TolerantMode));
+void MainWindow::OpenUserdataFolder(const QString &DataDir) {
+    QDesktopServices::openUrl(QUrl("file:" + DataDir, QUrl::TolerantMode));
 }
 
 void MainWindow::SelectPAKFile() {
@@ -1236,7 +1204,6 @@ void MainWindow::ExtractPAK(const QString &PAKPath, const QString &FolderPath) {
     // open file
     QFile PAKFile(PAKPath);
     if (!PAKFile.open(QIODevice::ReadOnly | QIODevice::ExistingOnly)) {
-        extract_failed = true;
         QMessageBox Message(QMessageBox::Warning, "", "无法读取文件：" + PAKPath, QMessageBox::Yes, nullptr,
                             Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
         // Message.button(QMessageBox::Yes)->setText("确定");

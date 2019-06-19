@@ -16,6 +16,4 @@ int main(int argc, char *argv[]) {
     QApplication::setActiveWindow(&w);
     w.show();
     return QApplication::exec();
-    // GameProc->Detach();
-    //delete GameProc;
 }

@@ -17,7 +17,7 @@ add_executable(PvZHelper
         pvz.cpp
         code.cpp
         list.cpp
-        portal.cpp)
+        window.cpp)
 
 qt5_use_modules(PvZHelper Widgets)
 

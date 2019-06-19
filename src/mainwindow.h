@@ -263,13 +263,13 @@ signals:
     
     void SpawnNextWave();
     
-    void NaturalSpawn(std::array<bool, 33> &zombies);
+    void NaturalSpawn(const std::array<bool, 33> &zombies);
     
-    void SimulateSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
-                       bool limit_giga, std::array<bool, 20> &giga_waves);
+    void SimulateSpawn(const std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
+                       bool limit_giga, const std::array<bool, 20> &giga_waves);
     
-    void ExtremeSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
-                      bool limit_giga, std::array<bool, 20> &giga_waves);
+    void ExtremeSpawn(const std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
+                      bool limit_giga, const std::array<bool, 20> &giga_waves);
     
     void RestoreSpawn();
     
@@ -350,15 +350,15 @@ public slots:
     
     void ShowZombieHP(int value);
     
-    void UpdateSpawnTable(std::array<int, 33> &zombies_count);
+    void UpdateSpawnTable(const std::array<int, 33> &zombies_count);
     
     void ClearSpawnTable();
     
-    void UpdateGigaWaves(std::array<bool, 20> &giga_waves);
+    void UpdateGigaWaves(const std::array<bool, 20> &giga_waves);
     
     void ShowSeed(uint32_t seed);
     
-    void OpenUserdataFolder(QString DataDir);
+    void OpenUserdataFolder(const QString &DataDir);
     
     void SelectPAKFile();
     

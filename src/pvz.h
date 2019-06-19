@@ -315,13 +315,13 @@ public slots:
 
 //Spawn
     
-    void NaturalSpawn(std::array<bool, 33> &zombies);
+    void NaturalSpawn(const std::array<bool, 33> &zombies);
     
-    void SimulateSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
-                       bool limit_giga, std::array<bool, 20> &giga_waves);
+    void SimulateSpawn(const std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
+                       bool limit_giga, const std::array<bool, 20> &giga_waves);
     
-    void ExtremeSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
-                      bool limit_giga, std::array<bool, 20> &giga_waves);
+    void ExtremeSpawn(const std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
+                      bool limit_giga, const std::array<bool, 20> &giga_waves);
     
     void RestoreSpawn();
     
@@ -407,10 +407,10 @@ private:
     
     void UpdateZombiesPreview();
     
-    void InternalSpawn(std::array<bool, 33> &zombies);
+    void InternalSpawn(const std::array<bool, 33> &zombies);
     
-    void CustomizeSpawn(std::array<bool, 33> &zombies, bool simulate, bool limit_flag, bool limit_yeti,
-                        bool limit_bungee, bool limit_giga, std::array<bool, 20> &giga_waves);
+    void CustomizeSpawn(const std::array<bool, 33> &zombies, bool simulate, bool limit_flag, bool limit_yeti,
+                        bool limit_bungee, bool limit_giga, const std::array<bool, 20> &giga_waves);
     
     Memory memory;
     Code code;

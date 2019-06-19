@@ -2,7 +2,6 @@
 #include <mach/mach_vm.h>
 #include <cassert>
 #include <cerrno>
-#include <iostream>
 #include <string>
 #include <err.h>
 
@@ -23,7 +22,6 @@ void mach_check_error(kern_return_t ret, const char *file, unsigned int line, co
 Memory::Memory() {
     pid = 0;
     pmach_port = 0;
-    pinfo_proc = nullptr;
 }
 
 pid_t Memory::Attach(const std::string &procName) {
@@ -132,8 +130,7 @@ kern_return_t Memory::Free(uintptr_t address, size_t size) {
 std::string Memory::ReadString(uintptr_t address) {
     std::string result;
     for (size_t i = 0; i < kMaxStringLength; i++) {
-        char c;
-        Read(address + i, sizeof(unsigned char), &c);
+        char c = Read<unsigned char>(address + i);
         if (c)
             result.append(&c, sizeof(unsigned char));
         else
@@ -178,7 +175,7 @@ void Memory::QueryRegions() {
     }
 }
 
-void Memory::PidFromName(const char *procname) {
+void Memory::PidFromName(const char *procName) {
     pid = 0;
     kinfo_proc *procList;
     size_t procCount;
@@ -186,7 +183,7 @@ void Memory::PidFromName(const char *procname) {
     GetProcessList(&procList, &procCount);
     
     for (size_t j = 0; j < procCount + 1; j++) {
-        if (strcmp(procList[j].kp_proc.p_comm, procname) == 0)
+        if (strcmp(procList[j].kp_proc.p_comm, procName) == 0)
             pid = procList[j].kp_proc.p_pid;
     }
     

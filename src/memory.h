@@ -36,8 +36,7 @@ public:
     
     kern_return_t Protect(uintptr_t address, size_t size, vm_prot_t protection, vm_prot_t *backup = nullptr);
     
-    uintptr_t
-    Allocate(size_t size, vm_prot_t prot = VM_PROT_ALL, uintptr_t BaseAddr = 0);
+    uintptr_t Allocate(size_t size, vm_prot_t prot = VM_PROT_ALL, uintptr_t BaseAddr = 0);
     
     kern_return_t Free(uintptr_t address, size_t size);
     
@@ -106,7 +105,6 @@ private:
     
     pid_t pid;
     mach_port_t pmach_port;
-    struct kinfo_proc *pinfo_proc;
     std::vector<MemoryRegion_t> segments;
 };
 
