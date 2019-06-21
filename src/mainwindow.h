@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QCloseEvent>
 #include <QTableWidget>
+#include <QTimer>
 
 namespace Ui {
     class MainWindow;
@@ -396,11 +397,11 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    PvZ *pvz;
     QTableWidget *SpawnTable;
     Portal *PortalWindow;
     TargetMap *TargetMapWindow;
-    PvZ *pvz;
-    List *list;
+    QTimer Timer;
 protected:
     void closeEvent(QCloseEvent *event) override;
     

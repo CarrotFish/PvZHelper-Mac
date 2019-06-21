@@ -6,7 +6,6 @@
 #include <array>
 #include <QMessageBox>
 #include <QHeaderView>
-#include <QTimer>
 #include <QMenuBar>
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -14,12 +13,12 @@
 #include <QStandardPaths>
 #include <QDebug>
 
-#define APP_VER "1.3.1"
+#define APP_VER "1.3.2"
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow), SpawnTable(new QTableWidget(this)), PortalWindow(new Portal(this)),
-        TargetMapWindow(new TargetMap(this)), pvz(new PvZ(ui, this)), list(new List) {
+        TargetMapWindow(new TargetMap(this)), pvz(new PvZ(ui, this)), Timer(this) {
     SpawnTable->hide();
     PortalWindow->hide();
     TargetMapWindow->hide();
@@ -64,24 +63,28 @@ void MainWindow::ConnectWidgets() {
     connect(showAboutQt, &QAction::triggered, this, &MainWindow::ShowAboutQtWindow);
     ui->label_35->setText(QStringLiteral("PvZ Helper v") + APP_VER);
     
-    ui->PlantType->addItems(list->PlantsList);
-    ui->ZombieType->addItems(list->ZombiesList);
-    ui->SlotContent->addItems(list->CardList);
-    ui->CardID->addItems(list->CardList);
-    ui->ResourceType->addItems(list->ResourceList);
+    List list;
+    ui->PlantType->addItems(list.PlantsList);
+    ui->ZombieType->addItems(list.ZombiesList);
+    ui->SlotContent->addItems(list.CardList);
+    ui->CardID->addItems(list.CardList);
+    ui->ResourceType->addItems(list.ResourceList);
     ui->ResourceType->setCurrentIndex(1);
-    ui->GameScene->addItems(list->MapList);
-    ui->PlantHPType->addItems(list->PlantHPList);
-    ui->PlantAttackIntervalType->addItems(list->PlantsList);
-    ui->ProjectileType->addItems(list->ProjectileList);
-    ui->ZombieHPType->addItems(list->ZombieHPList);
-    ui->SpawnType->addItems(list->ZombiesList);
+    ui->GameScene->addItems(list.MapList);
+    ui->PlantHPType->addItems(list.PlantHPList);
+    ui->PlantAttackIntervalType->addItems(list.PlantsList);
+    ui->ProjectileType->addItems(list.ProjectileList);
+    ui->ZombieHPType->addItems(list.ZombieHPList);
+    ui->SpawnType->addItems(list.ZombiesList);
     ui->tabWidget->removeTab(10);
     QRegExp regExp("[a-fA-F0-9]{8}");
     ui->SpawnSeed->setValidator(new QRegExpValidator(regExp, this));
     //Page 0
     connect(ui->FindGameProc, &QPushButton::clicked, this, &MainWindow::FindGameProc);
     connect(ui->AutoRefreshGameStatus, &QCheckBox::toggled, this, &MainWindow::AutoRefreshGameStatus);
+    connect(&Timer, &QTimer::timeout, this, [=]() {
+        emit GetGameStatus(false);
+    });
     connect(ui->MaintainCheckedItem, &QPushButton::clicked, this, &MainWindow::MaintainCheckedItem);
     //Page 1
     connect(ui->ModifySun, &QPushButton::clicked, this, [=]() {
@@ -472,7 +475,7 @@ void MainWindow::ConnectWidgets() {
         ui->SpawnList->clear();
         for (int i = 0; i < 33; i++) {
             if (zombies[i])
-                ui->SpawnList->addItem(list->ZombiesList.at(i));
+                ui->SpawnList->addItem(List().ZombiesList.at(i));
         }
         ui->tabWidget->removeTab(7);
         ui->tabWidget->removeTab(8);
@@ -486,13 +489,13 @@ void MainWindow::ConnectWidgets() {
     connect(ui->ShowSpawnHelp, &QPushButton::clicked, this, &MainWindow::ShowSpawnHelpWindow);
     connect(ui->AddSpawnType, &QPushButton::clicked, this, [=]() {
         std::array<bool, 33> zombies = {false};
-        zombies[list->ZombiesList.indexOf(ui->SpawnType->currentText())] = true;
+        zombies[List().ZombiesList.indexOf(ui->SpawnType->currentText())] = true;
         for (int i = 0; i < ui->SpawnList->count(); i++)
-            zombies[list->ZombiesList.indexOf(ui->SpawnList->item(i)->text())] = true;
+            zombies[List().ZombiesList.indexOf(ui->SpawnList->item(i)->text())] = true;
         ui->SpawnList->clear();
         for (int i = 0; i < 33; i++) {
             if (zombies[i])
-                ui->SpawnList->addItem(list->ZombiesList.at(i));
+                ui->SpawnList->addItem(List().ZombiesList.at(i));
         }
     });
     connect(ui->RemoveSpawnType, &QPushButton::clicked, this, [=]() {
@@ -543,7 +546,7 @@ void MainWindow::ConnectWidgets() {
             giga_waves[id] = gigaWave->isChecked();
         }
         for (int i = 0; i < ui->SpawnList->count(); i++) {
-            zombies[list->ZombiesList.indexOf(ui->SpawnList->item(i)->text())] = true;
+            zombies[List().ZombiesList.indexOf(ui->SpawnList->item(i)->text())] = true;
         }
         if (ui->NaturalSpawn_2->isChecked()) {
             emit NaturalSpawn(zombies);
@@ -562,7 +565,7 @@ void MainWindow::ConnectWidgets() {
     connect(ui->SwitchBriefPage, &QPushButton::clicked, this, [=]() {
         std::array<bool, 33> zombies = {false};
         for (int i = 0; i < ui->SpawnList->count(); i++)
-            zombies[list->ZombiesList.indexOf(ui->SpawnList->item(i)->text())] = true;
+            zombies[List().ZombiesList.indexOf(ui->SpawnList->item(i)->text())] = true;
         auto spawnTypes = ui->tab_7->findChildren<QCheckBox *>(QRegularExpression("SpawnType_.*"));
         int index[20] = {2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 32};
         for (auto &spawn:spawnTypes) {
@@ -845,7 +848,6 @@ void MainWindow::ConnectSlots() const {
 MainWindow::~MainWindow() {
     delete ui;
     delete pvz;
-    delete list;
     delete SpawnTable;
 }
 
@@ -922,7 +924,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
             auto Tab = ui->tabWidget->widget(i);
             auto WidgetList = Tab->findChildren<QCheckBox *>();
             for (auto CheckBox:WidgetList) {
-                if (CheckBox->isChecked() && !list->NonMaintainCheckBox.contains(CheckBox->objectName())) {
+                if (CheckBox->isChecked() && !List().NonMaintainCheckBox.contains(CheckBox->objectName())) {
                     CheckBox->toggle();
                 }
             }
@@ -985,7 +987,7 @@ void MainWindow::MaintainCheckedItem() {
             auto Tab = ui->tabWidget->widget(i);
             auto WidgetList = Tab->findChildren<QCheckBox *>();
             for (auto CheckBox:WidgetList) {
-                if (!list->NonMaintainCheckBox.contains(CheckBox->objectName()))
+                if (!List().NonMaintainCheckBox.contains(CheckBox->objectName()))
                         emit CheckBox->toggled(CheckBox->isChecked());
             }
         }
@@ -994,14 +996,10 @@ void MainWindow::MaintainCheckedItem() {
 }
 
 void MainWindow::AutoRefreshGameStatus(bool on) {
-    static auto *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, [=]() {
-        emit GetGameStatus(false);
-    });
     if (on) {
-        timer->start(100);
+        Timer.start(100);
     } else {
-        timer->stop();
+        Timer.stop();
     }
 }
 
@@ -1090,7 +1088,7 @@ void MainWindow::UpdateSpawnTable(const std::array<int, 33> &zombies_count) {
     int row = 0;
     for (size_t i = 0; i < 33; i++) {
         if (zombies_count[i] > 0) {
-            SpawnTable->setItem(row, 0, new QTableWidgetItem(list->ZombiesList.at(i)));
+            SpawnTable->setItem(row, 0, new QTableWidgetItem(List().ZombiesList.at(i)));
             SpawnTable->setItem(row, 1, new QTableWidgetItem(QString::number(zombies_count[i])));
             SpawnTable->item(row, 0)->setFlags(Qt::ItemFlags(~Qt::ItemIsSelectable & ~Qt::ItemIsEditable));
             SpawnTable->item(row, 1)->setFlags(Qt::ItemFlags(~Qt::ItemIsSelectable & ~Qt::ItemIsEditable));
