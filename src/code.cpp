@@ -1,12 +1,11 @@
 #include "code.h"
-#include "xnumem.h"
+#include <unistd.h>
 #include <array>
 #include <QDebug>
 
 #define STACK_SIZE 65536
 
-Code::Code(class xnu_proc &process) :
-        _process(process), _core(process.core()), _memory(process.memory()) {
+Code::Code(Memory &memory) : memory(memory) {
     unsigned int page = 4;
     code = new unsigned char[4096 * page];
     length = 0;
@@ -16,7 +15,11 @@ Code::~Code() {
     delete[] code;
 }
 
-void Code::asm_init() {
+void Code::asm_init_codeInject() {
+    length = 0;
+}
+
+void Code::asm_init_newThread() {
     length = 23;                            //check the flag && set flag
     asm_mov_dword_ptr_exx(0x0, Reg::EAX);   //back up registers
     asm_mov_dword_ptr_exx(0x0, Reg::EBX);
@@ -208,18 +211,63 @@ void Code::asm_ret() {
 //         } else usleep(10000);
 //     }
 // }
+void Code::asm_code_inject(bool on, uint32_t address, size_t original_size) {
+    assert(original_size >= 5);
+    
+    uint32_t injected_code = 0;
+    const int code_size = length + original_size + 5;
+    if (on) {
+        injected_code = (uint32_t) memory.Allocate(code_size, VM_PROT_ALL);
 
-void Code::asm_code_inject() {
+#ifndef NDEBUG
+        qDebug() << injected_code;
+#endif
+        
+        if (injected_code) {
+            uint32_t offset = injected_code - address - 5,
+                    offset2 = address + original_size - injected_code - code_size;
+            //new code to replace the original one
+            auto ar1 = new unsigned char[original_size];
+            memset(ar1, 0x90, original_size);
+            ar1[0] = 0xE9;
+            memcpy(&ar1[1], &offset, 4);
+            //the original code
+            auto ar2 = new unsigned char[original_size];
+            memory.Read(address, original_size, ar2);
+            //code to inject
+            auto ar3 = new unsigned char[code_size];
+            memcpy(ar3, &code[0], length);
+            memcpy(&ar3[length], ar2, original_size);
+            ar3[code_size - 5] = 0xE9;
+            memcpy(&ar3[code_size - 4], &offset2, 4);
+            
+            memory.Write(injected_code, code_size, ar3);
+            memory.Write(address, original_size, ar1);
+            delete[] ar1;
+            delete[] ar2;
+            delete[] ar3;
+        }
+    } else if (memory.Read<unsigned char>(address) == 0xE9) {
+        injected_code = memory.Read<uint32_t>(address + 1) + address + 5;
+        auto ar1 = new unsigned char[original_size];
+        memory.Read(injected_code + length, original_size, ar1);
+        memory.Write(address, original_size, ar1);
+        memory.Free(injected_code, code_size);
+        delete[] ar1;
+    }
+}
+
+void Code::asm_create_thread() {
     int addr = 0x26C710; //0x2E0FE;
     for (int i = 0; i < 100; i++) {
-        if (_memory.Read<unsigned char>(addr) == 0xE9)
+        if (memory.Read<unsigned char>(addr) == 0xE9)
             usleep(10000);                          //avoid conflict
     }
-    uint32_t remoteStack = _memory.Allocate(STACK_SIZE, VM_PROT_READ | VM_PROT_WRITE);
-    uint32_t remoteCode = _memory.Allocate(length, VM_PROT_ALL);
-    uint32_t ThreadState = _memory.Allocate(40, VM_PROT_READ | VM_PROT_WRITE);
-    _memory.Write<int>(0x0, ThreadState);
-    _memory.Write<int>(0x0, ThreadState + 4);
+    uint32_t remoteStack = memory.Allocate(STACK_SIZE, VM_PROT_READ | VM_PROT_WRITE);
+    uint32_t remoteCode = memory.Allocate(length, VM_PROT_ALL);
+    uint32_t ThreadState = memory.Allocate(40, VM_PROT_READ | VM_PROT_WRITE);
+    memory.Write<int>(0x0, ThreadState);
+    memory.Write<int>(0x0, ThreadState + 4);
 
 #ifndef NDEBUG
     qDebug() << hex << remoteCode;
@@ -252,21 +300,21 @@ void Code::asm_code_inject() {
     offset = remoteCode - addr - 5;
     memcpy(&ar3[1], &offset, 4);
     
-    _memory.Write(remoteCode, length, code);    //write code
-    vm_protect(_core._pmach_port, remoteCode, length, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
-    _memory.Write(ar3, addr);                //replace the original code
+    memory.Write(remoteCode, length, code);    //write code
+    memory.Protect(remoteCode, length, VM_PROT_READ | VM_PROT_EXECUTE);
+    memory.Write(ar3, addr);                //replace the original code
     
     for (;;) {
         int temp;
-        if (_memory.Read(0x35EE64, 4, &temp) != KERN_SUCCESS)
+        if (memory.Read(0x35EE64, 4, &temp) != KERN_SUCCESS)
             break;
-        if (_memory.Read<int>(ThreadState + 4) == 1) {  //check flag(2)
+        if (memory.Read<int>(ThreadState + 4) == 1) {  //check flag(2)
             std::array<unsigned char, 6> ar4 = {0x8B, 0x81, 0x88, 0x00, 0x00, 0x00};//, 0x00, 0x00, 0x00};
-            _memory.Write(ar4, addr);        //restore the original code
+            memory.Write(ar4, addr);        //restore the original code
             usleep(10000);
-            _memory.Free(ThreadState, 40);      //free the allocated regions
-            _memory.Free(remoteCode, length);
-            _memory.Free(remoteStack, STACK_SIZE);
+            memory.Free(ThreadState, 40);      //free the allocated regions
+            memory.Free(remoteCode, length);
+            memory.Free(remoteStack, STACK_SIZE);
             break;
         } else
             usleep(10000);
@@ -344,6 +392,26 @@ void Code::asm_put_rake(int row, int column) {
     asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
     asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
     asm_call(0x26DA6);
+}
+
+void Code::asm_put_portal(int row, int column, int type) {
+    asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
+    asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
+    asm_add_exx(Reg::EAX, 0x110);
+    asm_mov_ptr_esp_add_exx(0x0, Reg::EAX);
+    asm_call(0x32832);
+    asm_mov_dword_ptr_exx_add(Reg::EAX, 0x8, type);
+    asm_mov_dword_ptr_exx_add(Reg::EAX, 0x10, column);
+    asm_mov_dword_ptr_exx_add(Reg::EAX, 0x14, row);
+    asm_add_word(0xC189);   //mov ecx, eax
+    asm_mov_dword_ptr_esp_add(0x8, 0);
+    asm_mov_dword_ptr_esp_add(0x4, row);
+    asm_mov_dword_ptr_esp_add(0x0, 307000);
+    asm_call(0xFDB8);
+    asm_add_byte(0x89);     //mov [ecx+0x1c], eax
+    asm_add_word(0x1C41);
+    asm_mov_ptr_esp_add_exx(0x0, Reg::ECX);
+    asm_call(0x20898C);
 }
 
 void Code::asm_put_coin(int row, int column, int type, int scene) {

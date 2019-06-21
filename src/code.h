@@ -1,6 +1,10 @@
 #ifndef CODE_H
 #define CODE_H
 
+#include "memory.h"
+#include <cstddef>
+#include <cstdint>
+
 enum class Reg : unsigned int {
     EAX = 0,
     EBX,
@@ -18,11 +22,13 @@ class Code {
     friend class xnu_proc;
 
 public:
-    explicit Code(class xnu_proc &process);
+    explicit Code(Memory &memory);
     
     ~Code();
     
-    void asm_init();
+    void asm_init_codeInject();
+    
+    void asm_init_newThread();
     
     void asm_add_byte(unsigned char);
     
@@ -56,7 +62,9 @@ public:
     
     void asm_ret();
     
-    void asm_code_inject();
+    void asm_code_inject(bool on, uint32_t address, size_t original_size);
+    
+    void asm_create_thread();
     
     void asm_set_plant(int row, int column, int type, bool imitater, bool iz_style);
     
@@ -70,6 +78,8 @@ public:
     
     void asm_put_rake(int row, int column);
     
+    void asm_put_portal(int row, int column, int type);
+    
     void asm_put_coin(int row, int column, int type, int scene);
 
 protected:
@@ -77,11 +87,7 @@ protected:
     unsigned int length;
 
 private:
-    class xnu_proc& _process;
-    
-    class ProcessCore& _core;
-    
-    class ProcessMemory& _memory;
+    Memory &memory;
 };
 
 #endif

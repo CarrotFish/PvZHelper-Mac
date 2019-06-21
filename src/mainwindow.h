@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QCloseEvent>
 #include <QTableWidget>
+#include <QTimer>
 
 namespace Ui {
     class MainWindow;
@@ -12,6 +13,10 @@ namespace Ui {
 class PvZ;
 
 class List;
+
+class Portal;
+
+class TargetMap;
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -157,6 +162,18 @@ signals:
     
     void ClearAllGridItems(int type);
     
+    void SetBlackPortal(int row_1, int column_1, int row_2, int column_2);
+    
+    void SetWhitePortal(int row_1, int column_1, int row_2, int column_2);
+    
+    void ActivePortal(bool on);
+    
+    void LockPortal(bool on);
+    
+    void GetTargetMap(int level);
+    
+    void SetTargetMap(int level, const std::array<int, 54> &targetMap);
+    
     void ModifyPlantHP(int type, int value);
     
     void GetPlantHP(int type);
@@ -247,17 +264,19 @@ signals:
     
     void NoEnterHouse(bool on);
     
+    void GatherZombies(bool on, float pos);
+    
     void AllZombiesXXX(int status);
     
     void SpawnNextWave();
     
-    void NaturalSpawn(std::array<bool, 33> &zombies);
+    void NaturalSpawn(const std::array<bool, 33> &zombies);
     
-    void SimulateSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
-                       bool limit_giga, std::array<bool, 20> &giga_waves);
+    void SimulateSpawn(const std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
+                       bool limit_giga, const std::array<bool, 20> &giga_waves);
     
-    void ExtremeSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
-                      bool limit_giga, std::array<bool, 20> &giga_waves);
+    void ExtremeSpawn(const std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
+                      bool limit_giga, const std::array<bool, 20> &giga_waves);
     
     void RestoreSpawn();
     
@@ -330,6 +349,8 @@ public slots:
     
     void ShowCardProperty(int cost, int cooldowntime);
     
+    void ShowTargetMap(const std::array<int, 54> &targetMap);
+    
     void ShowPlantHP(int value);
     
     void ShowPlantAttackInterval(int value);
@@ -338,15 +359,15 @@ public slots:
     
     void ShowZombieHP(int value);
     
-    void UpdateSpawnTable(std::array<int, 33> &zombies_count);
+    void UpdateSpawnTable(const std::array<int, 33> &zombies_count);
     
     void ClearSpawnTable();
     
-    void UpdateGigaWaves(std::array<bool, 20> &giga_waves);
+    void UpdateGigaWaves(const std::array<bool, 20> &giga_waves);
     
     void ShowSeed(uint32_t seed);
     
-    void OpenUserdataFolder(QString DataDir);
+    void OpenUserdataFolder(const QString &DataDir);
     
     void SelectPAKFile();
     
@@ -376,9 +397,11 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QTableWidget *SpawnTable;
     PvZ *pvz;
-    List *list;
+    QTableWidget *SpawnTable;
+    Portal *PortalWindow;
+    TargetMap *TargetMapWindow;
+    QTimer Timer;
 protected:
     void closeEvent(QCloseEvent *event) override;
     
@@ -388,7 +411,6 @@ protected:
     
     std::array<bool, 33> GetZombies() const;
     
-    std::array<bool, 20> GetGigaWaves() const;
 };
 
 #endif // MAINWINDOW_H

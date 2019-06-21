@@ -2,8 +2,9 @@
 #define PVZ_H
 
 #include <QObject>
-#include <array>
-#include "xnumem.h"
+#include <initializer_list>
+#include "memory.h"
+#include "code.h"
 
 typedef uint8_t byte;
 
@@ -35,6 +36,8 @@ signals:
     void CardOthers();
     
     void CardProperty(int cost, int cooldowntime);
+    
+    void TargetMap(const std::array<int, 54> &targetMap);
     
     void PlantHP(int value);
     
@@ -202,6 +205,18 @@ public slots:
     void ClearAllItems();
     
     void ClearAllGridItems(int type);
+    
+    void SetBlackPortal(int row_1, int column_1, int row_2, int column_2);
+    
+    void SetWhitePortal(int row_1, int column_1, int row_2, int column_2);
+    
+    void ActivePortal(bool on);
+    
+    void LockPortal(bool on);
+    
+    void GetTargetMap(int level);
+    
+    void SetTargetMap(int level, const std::array<int, 54> &targetMap);
 
 //Plants
     
@@ -297,19 +312,21 @@ public slots:
     
     void NoEnterHouse(bool on);
     
+    void GatherZombies(bool on, float pos);
+    
     void AllZombiesXXX(int status);
     
     void SpawnNextWave();
 
 //Spawn
     
-    void NaturalSpawn(std::array<bool, 33> &zombies);
+    void NaturalSpawn(const std::array<bool, 33> &zombies);
     
-    void SimulateSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
-                       bool limit_giga, std::array<bool, 20> &giga_waves);
+    void SimulateSpawn(const std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
+                       bool limit_giga, const std::array<bool, 20> &giga_waves);
     
-    void ExtremeSpawn(std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
-                      bool limit_giga, std::array<bool, 20> &giga_waves);
+    void ExtremeSpawn(const std::array<bool, 33> &zombies, bool limit_flag, bool limit_yeti, bool limit_bungee,
+                      bool limit_giga, const std::array<bool, 20> &giga_waves);
     
     void RestoreSpawn();
     
@@ -367,8 +384,10 @@ private:
     template<typename T, typename... Args>
     void WriteMemory(T value, Args... address);
     
-    template<size_t original_size, size_t size>
-    void CodeInject(bool on, uint32_t address, std::array<byte, size> &ar);
+    template<typename T, size_t size, typename... Args>
+    void WriteMemory(std::array<T, size> value, Args... address);
+    
+    void WriteMemory(std::initializer_list<byte> il, uintptr_t address);
     
     int CurGameMode();
     
@@ -396,14 +415,13 @@ private:
     
     void UpdateZombiesPreview();
     
-    void InternalSpawn(std::array<bool, 33> &zombies);
+    void InternalSpawn(const std::array<bool, 33> &zombies);
     
-    void CustomizeSpawn(std::array<bool, 33> &zombies, bool simulate, bool limit_flag, bool limit_yeti,
-                        bool limit_bungee, bool limit_giga, std::array<bool, 20> &giga_waves);
+    void CustomizeSpawn(const std::array<bool, 33> &zombies, bool simulate, bool limit_flag, bool limit_yeti,
+                        bool limit_bungee, bool limit_giga, const std::array<bool, 20> &giga_waves);
     
-    xnu_proc *GameProc;
-    ProcessMemory &memory;
-    Code &code;
+    Memory memory;
+    Code code;
     pid_t pid = 0;
     const uint32_t base = 0x35EE64;
     const std::string ProcessName = "Plants vs. Zombi";

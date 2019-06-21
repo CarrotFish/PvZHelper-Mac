@@ -55,6 +55,60 @@ List::List() {
             << QStringLiteral("巨型坚果")           // 50
             << QStringLiteral("花苗")             // 51
             << QStringLiteral("反向双发射手");        // 52
+    PlantsShortList
+            << QStringLiteral("豌豆")           // 0
+            << QStringLiteral("向日葵")            // 1
+            << QStringLiteral("樱桃")           // 2
+            << QStringLiteral("坚果墙")            // 3
+            << QStringLiteral("土豆雷")            // 4
+            << QStringLiteral("寒冰射手")           // 5
+            << QStringLiteral("大嘴花")            // 6
+            << QStringLiteral("双发")           // 7
+            << QStringLiteral("小喷菇")            // 8
+            << QStringLiteral("阳光菇")            // 9
+            << QStringLiteral("大喷菇")            // 10
+            << QStringLiteral("墓碑吞噬者")          // 11
+            << QStringLiteral("魅惑菇")            // 12
+            << QStringLiteral("胆小菇")            // 13
+            << QStringLiteral("寒冰菇")            // 14
+            << QStringLiteral("毁灭菇")            // 15
+            << QStringLiteral("睡莲")             // 16
+            << QStringLiteral("窝瓜")             // 17
+            << QStringLiteral("三线射手")           // 18
+            << QStringLiteral("缠绕海草")           // 19
+            << QStringLiteral("火爆辣椒")           // 20
+            << QStringLiteral("地刺")             // 21
+            << QStringLiteral("火炬树桩")           // 22
+            << QStringLiteral("高坚果")            // 23
+            << QStringLiteral("海蘑菇")            // 24
+            << QStringLiteral("路灯花")            // 25
+            << QStringLiteral("仙人掌")            // 26
+            << QStringLiteral("三叶草")            // 27
+            << QStringLiteral("裂荚射手")           // 28
+            << QStringLiteral("杨桃")             // 29
+            << QStringLiteral("南瓜头")            // 30
+            << QStringLiteral("磁力菇")            // 31
+            << QStringLiteral("卷心菜投手")          // 32
+            << QStringLiteral("花盆")             // 33
+            << QStringLiteral("玉米投手")           // 34
+            << QStringLiteral("咖啡豆")            // 35
+            << QStringLiteral("大蒜")             // 36
+            << QStringLiteral("叶子保护伞")          // 37
+            << QStringLiteral("金盏花")            // 38
+            << QStringLiteral("西瓜投手")           // 39
+            << QStringLiteral("机枪射手")           // 40
+            << QStringLiteral("双子向日葵")          // 41
+            << QStringLiteral("忧郁菇")            // 42
+            << QStringLiteral("香蒲")             // 43
+            << QStringLiteral("冰瓜")             // 44
+            << QStringLiteral("吸金磁")            // 45
+            << QStringLiteral("地刺王")            // 46
+            << QStringLiteral("玉米加农炮")          // 47
+            << QStringLiteral("模仿者")           // 48
+            << QStringLiteral("爆炸坚果")           // 49
+            << QStringLiteral("巨型坚果")           // 50
+            << QStringLiteral("花苗")             // 51
+            << QStringLiteral("反向双发射手");        // 52
     ZombiesList
             << QStringLiteral("普通僵尸")           // 0
             << QStringLiteral("旗帜僵尸")           // 1
@@ -89,6 +143,40 @@ List::List() {
             << QStringLiteral("窝瓜僵尸")           // 30
             << QStringLiteral("高坚果僵尸")          // 31
             << QStringLiteral("红眼巨人");          // 32
+    ZombiesShortList
+            << QStringLiteral("普僵")             // 0
+            << QStringLiteral("旗帜")             // 1
+            << QStringLiteral("路障")             // 2
+            << QStringLiteral("撑杆")             // 3
+            << QStringLiteral("铁桶")             // 4
+            << QStringLiteral("读报")             // 5
+            << QStringLiteral("铁门")             // 6
+            << QStringLiteral("橄榄")             // 7
+            << QStringLiteral("舞王")             // 8
+            << QStringLiteral("伴舞")             // 9
+            << QStringLiteral("鸭子")             // 10
+            << QStringLiteral("潜水")             // 11
+            << QStringLiteral("冰车")             // 12
+            << QStringLiteral("雪橇")             // 13
+            << QStringLiteral("海豚")             // 14
+            << QStringLiteral("小丑")             // 15
+            << QStringLiteral("气球")             // 16
+            << QStringLiteral("矿工")             // 17
+            << QStringLiteral("跳跳")             // 18
+            << QStringLiteral("雪人")             // 19
+            << QStringLiteral("蹦极")             // 20
+            << QStringLiteral("梯子")             // 21
+            << QStringLiteral("投篮")             // 22
+            << QStringLiteral("白眼")             // 23
+            << QStringLiteral("小鬼")             // 24
+            << QStringLiteral("僵王")             // 25
+            << QStringLiteral("豌豆")             // 26
+            << QStringLiteral("坚果")             // 27
+            << QStringLiteral("辣椒")             // 28
+            << QStringLiteral("机枪")             // 29
+            << QStringLiteral("窝瓜")             // 30
+            << QStringLiteral("高坚果")            // 31
+            << QStringLiteral("红眼");            // 32
     CardList
             << QStringLiteral("豌豆射手")           // 0
             << QStringLiteral("向日葵")            // 1
@@ -239,4 +327,13 @@ List::List() {
             << QStringLiteral("辣椒僵尸")
             << QStringLiteral("坚果头")
             << QStringLiteral("高坚果头");
+    NonMaintainCheckBox
+            << QStringLiteral("AutoRefreshGameStatus")
+            << QStringLiteral("SlotVisible")
+            << QStringLiteral("ShowShovel")
+            << QStringLiteral("SeedVisible")
+            << QStringLiteral("ImitaterOnly")
+            << QStringLiteral("LimitYeti")
+            << QStringLiteral("LimitBungee")
+            << QStringLiteral("LimitGiga");
 }
