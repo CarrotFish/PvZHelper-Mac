@@ -151,7 +151,7 @@ void MainWindow::ConnectWidgets() {
         emit ModifyAdventureLevel(level);
     });
     connect(ui->ModifyAdventureCompletionTimes, &QPushButton::clicked, this, [=]() {
-        int times = ui->ModifyAdventureCompletionTimes->text().toInt();
+        int times = ui->AdventureCompletionTimes->text().toInt();
         emit ModifyAdventureCompletionTimes(times);
     });
     connect(ui->ShowLimboPage, &QCheckBox::toggled, this, &MainWindow::ShowLimboPage);
