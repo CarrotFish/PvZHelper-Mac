@@ -2103,7 +2103,7 @@ void PvZ::GetSpawnList() {
 
 void PvZ::ModifyFertilizer(int value) {
     if (isGameOn())
-        WriteMemory<int>(value + 1000, base, 0x7F4, 0x204);
+        WriteMemory<int>(value + 1000, base, 0x7F4, 0x208);
 }
 
 void PvZ::ModifyBugSpray(int value) {
@@ -2126,7 +2126,6 @@ void PvZ::ModifyWisdomTreeHeight(int height) {
         if (CurGameMode() == 50) {
             WriteMemory<int>(height - 1, base, 0x7F4, 0x104);
             code.asm_init_newThread();
-            // code.asm_mov_exx(Reg::EAX, 0x35EE64); Game crashes
             code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
             code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
             code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x154);

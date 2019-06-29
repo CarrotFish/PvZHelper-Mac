@@ -68,8 +68,11 @@ void MainWindow::ConnectWidgets() {
     ui->ZombieType->addItems(list.ZombiesList);
     ui->SlotContent->addItems(list.CardList);
     ui->CardID->addItems(list.CardList);
-    ui->ResourceType->addItems(list.ResourceList);
+    ui->ResourceType->addItems(list.ResourceValueList);
     ui->ResourceType->setCurrentIndex(1);
+    ui->ItemType->addItems(list.GridItemList);
+    ui->ItemType->addItems(list.CoinList);
+    ui->ItemType->setCurrentIndex(1);
     ui->GameScene->addItems(list.MapList);
     ui->PlantHPType->addItems(list.PlantHPList);
     ui->PlantAttackIntervalType->addItems(list.PlantsList);
@@ -86,6 +89,7 @@ void MainWindow::ConnectWidgets() {
         emit GetGameStatus(false);
     });
     connect(ui->MaintainCheckedItem, &QPushButton::clicked, this, &MainWindow::MaintainCheckedItem);
+    connect(ui->RestoreCheckedItem, &QPushButton::clicked, this, &MainWindow::RestoreCheckedItem);
     //Page 1
     connect(ui->ModifySun, &QPushButton::clicked, this, [=]() {
         int sun = ui->Sun->text().toInt();
@@ -215,19 +219,23 @@ void MainWindow::ConnectWidgets() {
     connect(ui->PutItem, &QPushButton::clicked, this, [=]() {
         int type = ui->ItemType->currentIndex(), row = ui->Row->text().toInt() - 1, column =
                 ui->Column->text().toInt() - 1;
-        switch (type) {
-            case 0:
-                emit PutLadder(row, column);
-                break;
-            case 1:
-                emit PutGrave(row, column);
-                break;
-            case 2:
-                emit PutRake(row, column);
-                break;
-            default:
-                emit PutCoin(type - 2, row, column);
-                break;
+        if (type < 3) {
+            switch (type) {
+                case 0:
+                    emit PutLadder(row, column);
+                    break;
+                case 1:
+                    emit PutGrave(row, column);
+                    break;
+                case 2:
+                    emit PutRake(row, column);
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            int id[] = {1, 2, 3, 4, 5, 6, 8, 17, 18, 21, 22, 23};
+            emit PutCoin(id[type - 3], row, column);
         }
     });
     connect(ui->PumpkinLadder, &QPushButton::clicked, this, [=]() {
@@ -919,7 +927,7 @@ void MainWindow::ShowSpawnHelpWindow() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-    if (pvz->isGameOn(false) && !ui->KeepChangesOnExit->isChecked()) {
+    if (pvz->GameOn(false) && !ui->KeepChangesOnExit->isChecked()) {
         for (int i = 0; i < ui->tabWidget->count(); i++) {
             auto Tab = ui->tabWidget->widget(i);
             auto WidgetList = Tab->findChildren<QCheckBox *>();
@@ -982,13 +990,27 @@ void MainWindow::GameNotFound(bool alert) {
 }
 
 void MainWindow::MaintainCheckedItem() {
-    if (pvz->isGameOn()) {
+    if (pvz->GameOn()) {
         for (int i = 0; i < ui->tabWidget->count(); i++) {
             auto Tab = ui->tabWidget->widget(i);
             auto WidgetList = Tab->findChildren<QCheckBox *>();
             for (auto CheckBox:WidgetList) {
                 if (!List().NonMaintainCheckBox.contains(CheckBox->objectName()))
                         emit CheckBox->toggled(CheckBox->isChecked());
+            }
+        }
+        return;
+    }
+}
+
+void MainWindow::RestoreCheckedItem() {
+    if (pvz->GameOn()) {
+        for (int i = 0; i < ui->tabWidget->count(); i++) {
+            auto Tab = ui->tabWidget->widget(i);
+            auto WidgetList = Tab->findChildren<QCheckBox *>();
+            for (auto CheckBox:WidgetList) {
+                if (!List().NonMaintainCheckBox.contains(CheckBox->objectName()) && CheckBox->isChecked())
+                    CheckBox->toggle();
             }
         }
         return;

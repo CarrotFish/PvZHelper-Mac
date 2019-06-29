@@ -170,7 +170,7 @@
       <property name="geometry">
        <rect>
         <x>380</x>
-        <y>110</y>
+        <y>140</y>
         <width>116</width>
         <height>23</height>
        </rect>
@@ -183,7 +183,7 @@
       <property name="geometry">
        <rect>
         <x>380</x>
-        <y>70</y>
+        <y>60</y>
         <width>120</width>
         <height>31</height>
        </rect>
@@ -365,6 +365,19 @@
       </property>
       <property name="text">
        <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="RestoreCheckedItem">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>100</y>
+        <width>120</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>取消已勾选功能</string>
       </property>
      </widget>
     </widget>
@@ -1792,7 +1805,7 @@
      <widget class="QPushButton" name="PutItem">
       <property name="geometry">
        <rect>
-        <x>110</x>
+        <x>115</x>
         <y>85</y>
         <width>90</width>
         <height>30</height>
@@ -2030,57 +2043,12 @@
      <widget class="QComboBox" name="ItemType">
       <property name="geometry">
        <rect>
-        <x>30</x>
+        <x>20</x>
         <y>85</y>
-        <width>81</width>
+        <width>100</width>
         <height>30</height>
        </rect>
       </property>
-      <item>
-       <property name="text">
-        <string>梯子</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>墓碑</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>钉耙</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>银币</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>金币</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>钻石</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>阳光</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>小阳光</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>大阳光</string>
-       </property>
-      </item>
      </widget>
      <widget class="QPushButton" name="ShowPortal">
       <property name="geometry">

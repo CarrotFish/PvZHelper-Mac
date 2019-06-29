@@ -383,6 +383,8 @@ private slots:
     
     void MaintainCheckedItem();
     
+    void RestoreCheckedItem();
+    
     void AutoRefreshGameStatus(bool on);
     
     void ShowSpawnHelpWindow();
