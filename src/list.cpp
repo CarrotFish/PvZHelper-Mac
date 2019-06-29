@@ -254,13 +254,30 @@ List::List() {
             << QStringLiteral("巨人僵尸")           // 73
             << QStringLiteral("小鬼僵尸")           // 74
             << QStringLiteral("未知");            // 75
-    ResourceList
+    CoinList
+            << QStringLiteral("银币")             // 1
+            << QStringLiteral("金币")             // 2
+            << QStringLiteral("钻石")             // 3
+            << QStringLiteral("阳光")             // 4
+            << QStringLiteral("小阳光")            // 5
+            << QStringLiteral("大阳光")            // 6
+            << QStringLiteral("奖杯")             // 8
+            << QStringLiteral("花苗")             // 17
+            << QStringLiteral("钱袋")             // 18
+            << QStringLiteral("银向日葵")           // 21
+            << QStringLiteral("金向日葵")           // 22
+            << QStringLiteral("巧克力");           // 23
+    ResourceValueList
             << QStringLiteral("小阳光")
             << QStringLiteral("普通阳光")
             << QStringLiteral("大阳光")
             << QStringLiteral("银币(/10)")
             << QStringLiteral("金币(/10)")
             << QStringLiteral("钻石(/10)");
+    GridItemList
+            << QStringLiteral("墓碑")             // 1
+            << QStringLiteral("梯子")             // 2
+            << QStringLiteral("钉耙");            // 3
     MapList
             << QStringLiteral("白天")              // 0
             << QStringLiteral("夜晚")              // 1

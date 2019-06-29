@@ -2103,7 +2103,7 @@ void PvZ::GetSpawnList() {
 
 void PvZ::ModifyFertilizer(int value) {
     if (isGameOn())
-        WriteMemory<int>(value + 1000, base, 0x7F4, 0x204);
+        WriteMemory<int>(value + 1000, base, 0x7F4, 0x208);
 }
 
 void PvZ::ModifyBugSpray(int value) {
@@ -2126,7 +2126,6 @@ void PvZ::ModifyWisdomTreeHeight(int height) {
         if (CurGameMode() == 50) {
             WriteMemory<int>(height - 1, base, 0x7F4, 0x104);
             code.asm_init_newThread();
-            // code.asm_mov_exx(Reg::EAX, 0x35EE64); Game crashes
             code.asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
             code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
             code.asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x154);
@@ -2153,6 +2152,95 @@ void PvZ::NoSnailSleep(bool on) {
     }
 }
 
+void PvZ::ChocolateState(bool on) {
+    if (isGameOn()) {
+        if (on) {
+            WriteMemory({0xB0, 0x01, 0x90}, 0x216A28);  //Garden Plant
+        } else {
+            WriteMemory({0x0F, 0x9E, 0xC0}, 0x216A28);
+        }
+    }
+}
+
+void PvZ::GardenPlantHappy() {
+    if (isGameOn()) {
+        auto plant_count = ReadMemory<uint32_t>(base, 0x7F4, 0x360);
+        auto plant_offset = ReadMemory<uint32_t>(base, 0x7F4) + 0x364;
+        for (size_t i = 0; i < plant_count; i++) {
+            WriteMemory<int>(3, plant_offset + 0x1C + 0x3C * i);        //Full size
+            time_t t;
+            time(&t);
+            WriteMemory<int>(0, plant_offset + 0x20 + 0x3C * i);        //Times watered
+            WriteMemory<int>(int(t), plant_offset + 0x14 + 0x3C * i);   //Last time of water
+            WriteMemory<int>(int(t), plant_offset + 0x2C + 0x3C * i);   //Last time of bug spray/music
+        }
+    }
+}
+
+void PvZ::GardenOperation() {
+    if (isGameOn()) {
+        auto plant_count = ReadMemory<uint32_t>(base, 0x7F4, 0x360);
+        auto plant_offset = ReadMemory<uint32_t>(base, 0x7F4) + 0x364;
+        auto money = ReadMemory<int>(base, 0x7F4, 0x38);
+        auto plant_food = ReadMemory<int>(base, 0x7F4, 0x208);
+        if (plant_food != 0)
+            plant_food -= 1000;
+        auto bug_spray = ReadMemory<int>(base, 0x7F4, 0x20C);
+        if (bug_spray != 0)
+            bug_spray -= 1000;
+        for (size_t i = 0; i < plant_count; i++) {
+            auto plant_size = ReadMemory<int>(plant_offset + 0x1C + 0x3C * i);
+            auto plant_water_times = ReadMemory<int>(plant_offset + 0x20 + 0x3C * i);
+            auto plant_water_needed = ReadMemory<int>(plant_offset + 0x24 + 0x3C * i);
+            auto plant_status = ReadMemory<int>(plant_offset + 0x28 + 0x3C * i);
+            time_t t;
+            time(&t);
+            money += plant_water_needed - plant_water_times;
+            if (plant_size != 3) {
+                if (plant_size == 0)
+                    money += 5;
+                else if (plant_size == 1)
+                    money += 10;
+                else if (plant_size == 2)
+                    money += 200;
+                plant_food--;
+                WriteMemory<int>(plant_size + 1, plant_offset + 0x1C + 0x3C * i);
+                WriteMemory<int>(int(t), plant_offset + 0x30 + 0x3C * i);   //Last time of plant food
+            } else {
+                auto plant_type = ReadMemory<int>(plant_offset + 0x3C * i);
+                if ((plant_type >= 8 && plant_type <= 16 && plant_type != 11) || plant_type == 19 || plant_type == 24)
+                    money += 15;
+                else
+                    money += 5;
+                if (plant_status == 3)
+                    bug_spray--;
+                WriteMemory<int>(int(t), plant_offset + 0x2C + 0x3C * i);   //Last time of bug spray/music
+            }
+            WriteMemory<int>(0, plant_offset + 0x20 + 0x3C * i);            //Times watered
+            WriteMemory<int>(int(t), plant_offset + 0x14 + 0x3C * i);       //Last time of water
+        }
+        if (plant_food < 0) {
+            auto plant_food_left = plant_food % 5;
+            if (plant_food_left)
+                plant_food_left += 5;
+            money -= (plant_food_left - plant_food) * 15;
+            plant_food = plant_food_left;
+        }
+        if (bug_spray < 0) {
+            auto bug_spray_left = bug_spray % 5;
+            if (bug_spray_left)
+                bug_spray_left += 5;
+            money -= (bug_spray_left - bug_spray) * 20;
+            bug_spray = bug_spray_left;
+        }
+        WriteMemory<int>(plant_food + 1000, base, 0x7F4, 0x208);
+        WriteMemory<int>(bug_spray + 1000, base, 0x7F4, 0x20C);
+        if (money < 0)
+            money = 0;
+        WriteMemory<int>(money, base, 0x7F4, 0x38);
+    }
+}
+
 void PvZ::MarigoldRefresh() {
     if (isGameOn()) {
         WriteMemory<int>(0x0, base, 0x7F4, 0x1F8);
@@ -2163,17 +2251,17 @@ void PvZ::MarigoldRefresh() {
 
 void PvZ::GardenPlantRight() {
     auto plant_count = ReadMemory<uint32_t>(base, 0x7F4, 0x360);
-    auto plant_offset = ReadMemory<uint32_t>(base, 0x7F4) + 0x360;
+    auto plant_offset = ReadMemory<uint32_t>(base, 0x7F4) + 0x364;
     for (size_t i = 0; i < plant_count; i++) {
-        WriteMemory<int>(0x0, plant_offset + 0x14 + 0x3C * i);
+        WriteMemory<int>(0x0, plant_offset + 0x10 + 0x3C * i);
     }
 }
 
 void PvZ::GardenPlantLeft() {
     auto plant_count = ReadMemory<uint32_t>(base, 0x7F4, 0x360);
-    auto plant_offset = ReadMemory<uint32_t>(base, 0x7F4) + 0x360;
+    auto plant_offset = ReadMemory<uint32_t>(base, 0x7F4) + 0x364;
     for (size_t i = 0; i < plant_count; i++) {
-        WriteMemory<int>(0x1, plant_offset + 0x14 + 0x3C * i);
+        WriteMemory<int>(0x1, plant_offset + 0x10 + 0x3C * i);
     }
 }
 

@@ -294,6 +294,12 @@ signals:
     
     void NoSnailSleep(bool on);
     
+    void ChocolateState(bool on);
+    
+    void GardenPlantHappy();
+    
+    void GardenOperation();
+    
     void MarigoldRefresh();
     
     void GardenPlantRight();
@@ -382,6 +388,8 @@ private slots:
     static void ShowAboutQtWindow();
     
     void MaintainCheckedItem();
+    
+    void RestoreCheckedItem();
     
     void AutoRefreshGameStatus(bool on);
     

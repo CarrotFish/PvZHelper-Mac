@@ -17,6 +17,15 @@ class MainWindow;
 class PvZ : public QObject {
 Q_OBJECT
 
+public:
+    PvZ(Ui::MainWindow *ui, MainWindow *MainWindow);
+    
+    ~PvZ() override;
+    
+    bool GameOn(bool alert = true) {
+        return isGameOn(alert);
+    }
+
 signals:
     
     void GameFound(pid_t pid);
@@ -55,14 +64,7 @@ signals:
     
     void UserdataFolder(QString DataDir);
 
-public:
-    PvZ(Ui::MainWindow *ui, MainWindow *MainWindow);
-    
-    ~PvZ() override;
-
 public slots:
-    
-    bool isGameOn(bool alert = true);
     
     void FindGameProc();
     
@@ -346,6 +348,12 @@ public slots:
     
     void NoSnailSleep(bool on);
     
+    void ChocolateState(bool on);
+    
+    void GardenPlantHappy();
+    
+    void GardenOperation();
+    
     void MarigoldRefresh();
     
     void GardenPlantRight();
@@ -388,6 +396,8 @@ private:
     void WriteMemory(std::array<T, size> value, Args... address);
     
     void WriteMemory(std::initializer_list<byte> il, uintptr_t address);
+    
+    bool isGameOn(bool alert = true);
     
     int CurGameMode();
     

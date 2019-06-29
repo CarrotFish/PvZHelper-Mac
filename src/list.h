@@ -10,7 +10,9 @@ public:
     QStringList ZombiesList;
     QStringList ZombiesShortList;
     QStringList CardList;
-    QStringList ResourceList;
+    QStringList CoinList;
+    QStringList ResourceValueList;
+    QStringList GridItemList;
     QStringList MapList;
     QStringList PlantHPList;
     QStringList ProjectileList;
