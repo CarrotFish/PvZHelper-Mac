@@ -348,6 +348,12 @@ public slots:
     
     void NoSnailSleep(bool on);
     
+    void ChocolateState(bool on);
+    
+    void GardenPlantHappy();
+    
+    void GardenOperation();
+    
     void MarigoldRefresh();
     
     void GardenPlantRight();

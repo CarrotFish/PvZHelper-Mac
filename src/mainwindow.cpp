@@ -13,7 +13,7 @@
 #include <QStandardPaths>
 #include <QDebug>
 
-#define APP_VER "1.3.2"
+#define APP_VER "1.3.3"
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
@@ -610,7 +610,10 @@ void MainWindow::ConnectWidgets() {
         emit ModifyWisdomTreeHeight(value);
     });
     connect(ui->NoSnailSleep, &QCheckBox::toggled, this, &MainWindow::NoSnailSleep);
+    connect(ui->ChocolateState, &QCheckBox::toggled, this, &MainWindow::ChocolateState);
     connect(ui->MarigoldRefresh, &QPushButton::clicked, this, &MainWindow::MarigoldRefresh);
+    connect(ui->GardenPlantHappy, &QPushButton::clicked, this, &MainWindow::GardenPlantHappy);
+    connect(ui->GardenOperation, &QPushButton::clicked, this, &MainWindow::GardenOperation);
     connect(ui->GardenPlantRight, &QPushButton::clicked, this, &MainWindow::GardenPlantRight);
     connect(ui->GardenPlantLeft, &QPushButton::clicked, this, &MainWindow::GardenPlantLeft);
     //Page 9
@@ -827,6 +830,9 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::ModifyTreeFertilizer, pvz, &PvZ::ModifyTreeFertilizer);
     connect(this, &MainWindow::ModifyWisdomTreeHeight, pvz, &PvZ::ModifyWisdomTreeHeight);
     connect(this, &MainWindow::NoSnailSleep, pvz, &PvZ::NoSnailSleep);
+    connect(this, &MainWindow::ChocolateState, pvz, &PvZ::ChocolateState);
+    connect(this, &MainWindow::GardenPlantHappy, pvz, &PvZ::GardenPlantHappy);
+    connect(this, &MainWindow::GardenOperation, pvz, &PvZ::GardenOperation);
     connect(this, &MainWindow::MarigoldRefresh, pvz, &PvZ::MarigoldRefresh);
     connect(this, &MainWindow::GardenPlantRight, pvz, &PvZ::GardenPlantRight);
     connect(this, &MainWindow::GardenPlantLeft, pvz, &PvZ::GardenPlantLeft);

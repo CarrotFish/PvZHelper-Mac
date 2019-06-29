@@ -3517,7 +3517,7 @@
      <widget class="QPushButton" name="MarigoldRefresh">
       <property name="geometry">
        <rect>
-        <x>55</x>
+        <x>50</x>
         <y>130</y>
         <width>100</width>
         <height>30</height>
@@ -3530,40 +3530,79 @@
      <widget class="QPushButton" name="GardenPlantRight">
       <property name="geometry">
        <rect>
-        <x>195</x>
-        <y>130</y>
+        <x>50</x>
+        <y>170</y>
         <width>100</width>
         <height>30</height>
        </rect>
       </property>
       <property name="text">
-       <string>花盆全正向</string>
+       <string>全部正向</string>
       </property>
      </widget>
      <widget class="QPushButton" name="GardenPlantLeft">
       <property name="geometry">
        <rect>
-        <x>335</x>
-        <y>130</y>
+        <x>190</x>
+        <y>170</y>
         <width>100</width>
         <height>30</height>
        </rect>
       </property>
       <property name="text">
-       <string>花盆全反向</string>
+       <string>全部反向</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="NoSnailSleep">
       <property name="geometry">
        <rect>
-        <x>290</x>
-        <y>85</y>
+        <x>270</x>
+        <y>90</y>
         <width>90</width>
         <height>23</height>
        </rect>
       </property>
       <property name="text">
        <string>蜗牛不睡觉</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="GardenOperation">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>130</y>
+        <width>100</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>一键处理</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="GardenPlantHappy">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>130</y>
+        <width>100</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>全部发光</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="ChocolateState">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>90</y>
+        <width>90</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>全体巧克力</string>
       </property>
      </widget>
     </widget>
