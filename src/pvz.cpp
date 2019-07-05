@@ -30,8 +30,7 @@ inline void PvZ::WriteMemory(std::initializer_list<byte> il, uintptr_t address) 
     memory.Write(address, il.size(), (void *) il.begin());
 }
 
-PvZ::PvZ(Ui::MainWindow *ui, MainWindow *MainWindow) : ui(ui), window(MainWindow), memory(Memory()),
-                                                       code(Code(memory)) {
+PvZ::PvZ(MainWindow *mainWindow) : window(mainWindow), memory(Memory()), code(Code(memory)) {
     connect(this, &PvZ::ResourceValue, window, &MainWindow::SetResourceValue);
     connect(this, &PvZ::GameFound, window, &MainWindow::GameFound);
     connect(this, &PvZ::GameStatus, window, &MainWindow::ShowGameStatus);
@@ -1037,9 +1036,8 @@ void PvZ::SpawnZombie(int type, int count) {
         if (count > zombie_count_limit)
             count = zombie_count_limit;
         code.asm_init_newThread();
-        for (size_t i = 0; i < count; i++) {
+        for (size_t i = 0; i < count; i++)
             code.asm_spawn_zombie(type);
-        }
         code.asm_ret();
         code.asm_create_thread();
     }
@@ -1068,11 +1066,9 @@ void PvZ::BigFog(bool on) {
 void PvZ::SeeVase(bool on) {
     if (isGameOn()) {
         if (on)
-            WriteMemory(std::array<byte, 11>{0xC7, 0x40, 0x4C, 0x64, 0x00, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90},
-                        0x20812E);
+            WriteMemory({0xC7, 0x40, 0x4C, 0x64, 0x00, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90}, 0x20812E);
         else
-            WriteMemory(std::array<byte, 11>{0x8B, 0x40, 0x4C, 0x85, 0xC0, 0x0F, 0x8E, 0xC6, 0x04, 0x00, 0x00},
-                        0x20812E);
+            WriteMemory({0x8B, 0x40, 0x4C, 0x85, 0xC0, 0x0F, 0x8E, 0xC6, 0x04, 0x00, 0x00}, 0x20812E);
     }
 }
 
@@ -2243,9 +2239,9 @@ void PvZ::GardenOperation() {
 
 void PvZ::MarigoldRefresh() {
     if (isGameOn()) {
-        WriteMemory<int>(0x0, base, 0x7F4, 0x1F8);
-        WriteMemory<int>(0x0, base, 0x7F4, 0x1FC);
-        WriteMemory<int>(0x0, base, 0x7F4, 0x200);
+        WriteMemory<int>(0, base, 0x7F4, 0x1F8);
+        WriteMemory<int>(0, base, 0x7F4, 0x1FC);
+        WriteMemory<int>(0, base, 0x7F4, 0x200);
     }
 }
 

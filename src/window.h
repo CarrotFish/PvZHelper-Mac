@@ -31,7 +31,7 @@ public:
     void RestoreChanges();
 
 private:
-    Ui::PortalWindow *PortalUi;
+    Ui::PortalWindow *ui;
     MainWindow *mainWindow;
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -55,10 +55,10 @@ public:
     ~TargetMap() override;
 
 private:
-    Ui::TargetMapWindow *TargetMapUi;
+    Ui::TargetMapWindow *ui;
     MainWindow *mainWindow;
 protected:
     void closeEvent(QCloseEvent *event) override;
 };
 
-#endif //PVZHELPER_WINDOW_H
+#endif //WINDOW_H

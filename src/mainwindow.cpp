@@ -15,10 +15,11 @@
 
 #define APP_VER "1.3.3"
 
-MainWindow::MainWindow(QWidget *parent) :
-        QMainWindow(parent),
-        ui(new Ui::MainWindow), SpawnTable(new QTableWidget(this)), PortalWindow(new Portal(this)),
-        TargetMapWindow(new TargetMap(this)), pvz(new PvZ(ui, this)), Timer(this) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), Timer(this) {
+    SpawnTable = new QTableWidget(this);
+    PortalWindow = new Portal(this);
+    TargetMapWindow = new TargetMap(this);
+    pvz = new PvZ(this);
     SpawnTable->hide();
     PortalWindow->hide();
     TargetMapWindow->hide();
@@ -57,7 +58,7 @@ void MainWindow::ConnectWidgets() {
     connect(showHelp, &QAction::triggered, this, &MainWindow::ShowHelpWindow);
     connect(showAbout, &QAction::triggered, this, &MainWindow::ShowAboutWindow);
     connect(CheckUpdate, &QAction::triggered, this, [=]() {
-        QString url = "https://github.com/CarrotFish/PvZHelper-Mac/releases";
+        QString url = "https://github.com/zhoury18/PvZHelper-Mac/releases";
         QDesktopServices::openUrl(QUrl(url));
     });
     connect(showAboutQt, &QAction::triggered, this, &MainWindow::ShowAboutQtWindow);
@@ -80,6 +81,13 @@ void MainWindow::ConnectWidgets() {
     ui->ZombieHPType->addItems(list.ZombieHPList);
     ui->SpawnType->addItems(list.ZombiesList);
     ui->tabWidget->removeTab(10);
+    for (int i = 0; i < 9; i++) {
+        auto Tab = ui->tabWidget->widget(i);
+        auto WidgetList = Tab->findChildren<QLineEdit *>();
+        for (auto lineEdit:WidgetList) {
+            lineEdit->setValidator(new QIntValidator(this));
+        }
+    }
     QRegExp regExp("[a-fA-F0-9]{8}");
     ui->SpawnSeed->setValidator(new QRegExpValidator(regExp, this));
     //Page 0
@@ -863,6 +871,8 @@ MainWindow::~MainWindow() {
     delete ui;
     delete pvz;
     delete SpawnTable;
+    delete PortalWindow;
+    delete TargetMapWindow;
 }
 
 void MainWindow::ShowHelpWindow() {
@@ -892,7 +902,7 @@ void MainWindow::ShowAboutWindow() {
                       + "<p>本程序由百度贴吧@46287153制作</p>"
                         "<p><a href=\"https://tieba.baidu.com/f?kw=植物大战僵尸\">植物大战僵尸吧</a></p>"
                         "<a href=\"https://tieba.baidu.com/home/main?un=46287153\">@46287153</a>"
-                        "<p><a href=\"https://github.com/CarrotFish/PvZHelper-Mac\">源代码</a></p>";
+                        "<p><a href=\"https://github.com/zhoury18/PvZHelper-Mac\">源代码</a></p>";
     AboutWindow->setText(Message);
     AboutWindow->setTextFormat(Qt::TextFormat::RichText);
     AboutWindow->setTextInteractionFlags(Qt::TextInteractionFlag::LinksAccessibleByMouse);
@@ -945,8 +955,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         }
         PortalWindow->RestoreChanges();
     }
-    delete PortalWindow;
-    delete TargetMapWindow;
     event->accept();
 }
 
@@ -1019,7 +1027,6 @@ void MainWindow::RestoreCheckedItem() {
                     CheckBox->toggle();
             }
         }
-        return;
     }
 }
 

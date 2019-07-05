@@ -10,14 +10,6 @@ namespace Ui {
     class MainWindow;
 }
 
-class PvZ;
-
-class List;
-
-class Portal;
-
-class TargetMap;
-
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
@@ -405,12 +397,12 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    PvZ *pvz;
+    class PvZ *pvz;
     QTableWidget *SpawnTable;
-    Portal *PortalWindow;
-    TargetMap *TargetMapWindow;
+    class Portal *PortalWindow;
+    class TargetMap *TargetMapWindow;
     QTimer Timer;
-protected:
+    
     void closeEvent(QCloseEvent *event) override;
     
     void ConnectSlots() const;
@@ -418,7 +410,6 @@ protected:
     void ConnectWidgets();
     
     std::array<bool, 33> GetZombies() const;
-    
 };
 
 #endif // MAINWINDOW_H

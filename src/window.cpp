@@ -5,23 +5,23 @@
 #include "list.h"
 #include <array>
 
-Portal::Portal(MainWindow *mainWindow) : PortalUi(new Ui::PortalWindow), mainWindow(mainWindow) {
+Portal::Portal(MainWindow *mainWindow) : ui(new Ui::PortalWindow), mainWindow(mainWindow) {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
                    Qt::WindowMinimizeButtonHint);
-    PortalUi->setupUi(this);
+    ui->setupUi(this);
     
-    connect(PortalUi->SetBlackPortal, &QPushButton::clicked, this, [=]() {
-        int row_1 = PortalUi->BlackRow_1->value() - 1, column_1 = PortalUi->BlackColumn_1->value() - 1,
-                row_2 = PortalUi->BlackRow_2->value() - 1, column_2 = PortalUi->BlackColumn_2->value() - 1;
+    connect(ui->SetBlackPortal, &QPushButton::clicked, this, [=]() {
+        int row_1 = ui->BlackRow_1->value() - 1, column_1 = ui->BlackColumn_1->value() - 1,
+                row_2 = ui->BlackRow_2->value() - 1, column_2 = ui->BlackColumn_2->value() - 1;
         emit SetBlackPortal(row_1, column_1, row_2, column_2);
     });
-    connect(PortalUi->SetWhitePortal, &QPushButton::clicked, this, [=]() {
-        int row_1 = PortalUi->WhiteRow_1->value() - 1, column_1 = PortalUi->WhiteColumn_1->value() - 1,
-                row_2 = PortalUi->WhiteRow_2->value() - 1, column_2 = PortalUi->WhiteColumn_2->value() - 1;
+    connect(ui->SetWhitePortal, &QPushButton::clicked, this, [=]() {
+        int row_1 = ui->WhiteRow_1->value() - 1, column_1 = ui->WhiteColumn_1->value() - 1,
+                row_2 = ui->WhiteRow_2->value() - 1, column_2 = ui->WhiteColumn_2->value() - 1;
         emit SetWhitePortal(row_1, column_1, row_2, column_2);
     });
-    connect(PortalUi->ActivePortal, &QCheckBox::toggled, this, &Portal::ActivePortal);
-    connect(PortalUi->LockPortal, &QCheckBox::toggled, this, &Portal::LockPortal);
+    connect(ui->ActivePortal, &QCheckBox::toggled, this, &Portal::ActivePortal);
+    connect(ui->LockPortal, &QCheckBox::toggled, this, &Portal::LockPortal);
     connect(this, &Portal::SetBlackPortal, mainWindow, &MainWindow::SetBlackPortal);
     connect(this, &Portal::SetWhitePortal, mainWindow, &MainWindow::SetWhitePortal);
     connect(this, &Portal::ActivePortal, mainWindow, &MainWindow::ActivePortal);
@@ -29,7 +29,7 @@ Portal::Portal(MainWindow *mainWindow) : PortalUi(new Ui::PortalWindow), mainWin
 }
 
 Portal::~Portal() {
-    delete PortalUi;
+    delete ui;
 }
 
 void Portal::closeEvent(QCloseEvent *event) {
@@ -38,16 +38,16 @@ void Portal::closeEvent(QCloseEvent *event) {
 }
 
 void Portal::RestoreChanges() {
-    if (PortalUi->ActivePortal->isChecked())
-        PortalUi->ActivePortal->toggle();
-    if (PortalUi->LockPortal->isChecked())
-        PortalUi->LockPortal->toggle();
+    if (ui->ActivePortal->isChecked())
+        ui->ActivePortal->toggle();
+    if (ui->LockPortal->isChecked())
+        ui->LockPortal->toggle();
 }
 
-TargetMap::TargetMap(MainWindow *mainWindow) : TargetMapUi(new Ui::TargetMapWindow), mainWindow(mainWindow) {
+TargetMap::TargetMap(MainWindow *mainWindow) : ui(new Ui::TargetMapWindow), mainWindow(mainWindow) {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
                    Qt::WindowMinimizeButtonHint);
-    TargetMapUi->setupUi(this);
+    ui->setupUi(this);
     auto targetPlants = this->findChildren<QComboBox *>(QRegularExpression("TargetPlant_.*"));
     List list;
     for (auto targetPlant:targetPlants) {
@@ -55,22 +55,22 @@ TargetMap::TargetMap(MainWindow *mainWindow) : TargetMapUi(new Ui::TargetMapWind
         targetPlant->addItems(list.PlantsList);
     }
     
-    connect(TargetMapUi->GetTargetMap, &QPushButton::clicked, this, [=]() {
+    connect(ui->GetTargetMap, &QPushButton::clicked, this, [=]() {
         int level = 0;
-        if (TargetMapUi->SeeingStars->isChecked())
+        if (ui->SeeingStars->isChecked())
             level = 22;
-        else if (TargetMapUi->ArtWallnut->isChecked())
+        else if (ui->ArtWallnut->isChecked())
             level = 36;
-        else if (TargetMapUi->ArtSunflower->isChecked())
+        else if (ui->ArtSunflower->isChecked())
             level = 40;
         emit GetTargetMap(level);
     });
-    connect(TargetMapUi->ClearTargetMap, &QPushButton::clicked, this, [=]() {
+    connect(ui->ClearTargetMap, &QPushButton::clicked, this, [=]() {
         auto targetPlants = this->findChildren<QComboBox *>(QRegularExpression("TargetPlant_.*"));
         for (auto targetPlant:targetPlants)
             targetPlant->setCurrentIndex(0);
     });
-    connect(TargetMapUi->SetTargetMap, &QPushButton::clicked, this, [=]() {
+    connect(ui->SetTargetMap, &QPushButton::clicked, this, [=]() {
         std::array<int, 54> targetMap{};
         auto targetPlants = this->findChildren<QComboBox *>(QRegularExpression("TargetPlant_.*"));
         for (auto targetPlant:targetPlants) {
@@ -78,11 +78,11 @@ TargetMap::TargetMap(MainWindow *mainWindow) : TargetMapUi(new Ui::TargetMapWind
             targetMap[id] = targetPlant->currentIndex() - 1;
         }
         int level = 0;
-        if (TargetMapUi->SeeingStars->isChecked())
+        if (ui->SeeingStars->isChecked())
             level = 22;
-        else if (TargetMapUi->ArtWallnut->isChecked())
+        else if (ui->ArtWallnut->isChecked())
             level = 36;
-        else if (TargetMapUi->ArtSunflower->isChecked())
+        else if (ui->ArtSunflower->isChecked())
             level = 40;
         emit SetTargetMap(level, targetMap);
     });
@@ -91,7 +91,7 @@ TargetMap::TargetMap(MainWindow *mainWindow) : TargetMapUi(new Ui::TargetMapWind
 }
 
 TargetMap::~TargetMap() {
-    delete TargetMapUi;
+    delete ui;
 }
 
 void TargetMap::ShowTargetMap(const std::array<int, 54> &targetMap) {

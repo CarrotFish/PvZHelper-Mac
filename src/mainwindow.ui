@@ -416,8 +416,14 @@
       <property name="text">
        <string>8000</string>
       </property>
+      <property name="frame">
+       <bool>true</bool>
+      </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="clearButtonEnabled">
+       <bool>false</bool>
       </property>
      </widget>
      <widget class="QPushButton" name="ModifySun">
@@ -3732,6 +3738,9 @@
         <height>21</height>
        </rect>
       </property>
+      <property name="clearButtonEnabled">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QPushButton" name="ExtractPAK">
       <property name="geometry">
@@ -3780,6 +3789,9 @@
         <width>271</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="clearButtonEnabled">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QPushButton" name="SelectFolder">

@@ -8,17 +8,11 @@
 
 typedef uint8_t byte;
 
-namespace Ui {
-    class MainWindow;
-}
-
-class MainWindow;
-
 class PvZ : public QObject {
 Q_OBJECT
 
 public:
-    PvZ(Ui::MainWindow *ui, MainWindow *MainWindow);
+    PvZ(class MainWindow *mainWindow);
     
     ~PvZ() override;
     
@@ -436,7 +430,6 @@ private:
     const uint32_t base = 0x35EE64;
     const std::string ProcessName = "Plants vs. Zombi";
     
-    Ui::MainWindow *ui;
     MainWindow *window;
 };
 
