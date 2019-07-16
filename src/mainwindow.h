@@ -6,17 +6,14 @@
 #include <QTableWidget>
 #include <QTimer>
 
-namespace Ui {
+namespace Ui
+{
     class MainWindow;
 }
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
 Q_OBJECT
-
-public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    
-    ~MainWindow() override;
 
 signals:
     
@@ -377,7 +374,7 @@ private slots:
     
     void ShowAboutWindow();
     
-    static void ShowAboutQtWindow();
+    void ShowAboutQtWindow();
     
     void MaintainCheckedItem();
     
@@ -391,19 +388,30 @@ private slots:
     
     void UpdateFolderPath(const QString &Path);
     
-    static void ExtractPAK(const QString &PAKPath, const QString &FolderPath);
+    void ExtractPAK(const QString &PAKPath, const QString &FolderPath);
     
-    static void PackPAK(const QString &FolderPath, const QString &PAKPath);
+    void PackPAK(const QString &FolderPath, const QString &PAKPath);
+
+public:
+    explicit MainWindow(QWidget *parent = nullptr);
+    
+    ~MainWindow() override;
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
-    class PvZ *pvz;
-    QTableWidget *SpawnTable;
-    class Portal *PortalWindow;
-    class TargetMap *TargetMapWindow;
-    QTimer Timer;
     
-    void closeEvent(QCloseEvent *event) override;
+    class PvZ *pvz;
+    
+    QTableWidget *SpawnTable;
+    
+    class Portal *PortalWindow;
+    
+    class TargetMap *TargetMapWindow;
+    
+    QTimer Timer;
     
     void ConnectSlots() const;
     

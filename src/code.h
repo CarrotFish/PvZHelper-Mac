@@ -1,11 +1,11 @@
 #ifndef CODE_H
 #define CODE_H
 
-#include "memory.h"
 #include <cstddef>
 #include <cstdint>
 
-enum class Reg : unsigned int {
+enum class Reg : unsigned int
+{
     EAX = 0,
     EBX,
     ECX,
@@ -16,13 +16,14 @@ enum class Reg : unsigned int {
     ESP,
 };
 
-class Code {
+class Code
+{
     friend class ProcessCore;
     
     friend class xnu_proc;
 
 public:
-    explicit Code(Memory &memory);
+    explicit Code(class Memory *memory);
     
     ~Code();
     
@@ -87,7 +88,7 @@ protected:
     unsigned int length;
 
 private:
-    Memory &memory;
+    Memory *memory;
 };
 
-#endif
+#endif //CODE_H

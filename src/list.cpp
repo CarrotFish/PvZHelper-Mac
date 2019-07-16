@@ -1,6 +1,7 @@
 #include "list.h"
 
-List::List() {
+List::List()
+{
     PlantsList
             << QStringLiteral("豌豆射手")           // 0
             << QStringLiteral("向日葵")            // 1

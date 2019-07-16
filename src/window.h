@@ -3,7 +3,8 @@
 
 #include <QWidget>
 
-namespace Ui {
+namespace Ui
+{
     class PortalWindow;
     
     class TargetMapWindow;
@@ -11,7 +12,8 @@ namespace Ui {
 
 class MainWindow;
 
-class Portal : public QWidget {
+class Portal : public QWidget
+{
 Q_OBJECT
 signals:
     
@@ -33,11 +35,10 @@ public:
 private:
     Ui::PortalWindow *ui;
     MainWindow *mainWindow;
-protected:
-    void closeEvent(QCloseEvent *event) override;
 };
 
-class TargetMap : public QWidget {
+class TargetMap : public QWidget
+{
 Q_OBJECT
 signals:
     
@@ -57,8 +58,6 @@ public:
 private:
     Ui::TargetMapWindow *ui;
     MainWindow *mainWindow;
-protected:
-    void closeEvent(QCloseEvent *event) override;
 };
 
 #endif //WINDOW_H

@@ -1,10 +1,13 @@
 #ifndef LIST_H
 #define LIST_H
+
 #include <QStringList>
 
-class List{
+class List
+{
 public:
     List();
+    
     QStringList PlantsList;
     QStringList PlantsShortList;
     QStringList ZombiesList;

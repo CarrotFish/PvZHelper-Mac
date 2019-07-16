@@ -1,11 +1,12 @@
 #include "memory.h"
+#include <err.h>
 #include <mach/mach_vm.h>
 #include <cassert>
 #include <cerrno>
 #include <string>
-#include <err.h>
 
-void mach_check_error(kern_return_t ret, const char *file, unsigned int line, const char *func) {
+void mach_check_error(kern_return_t ret, const char *file, unsigned int line, const char *func)
+{
     if (ret == KERN_SUCCESS) {
         return;
     }
@@ -19,12 +20,14 @@ void mach_check_error(kern_return_t ret, const char *file, unsigned int line, co
 
 }
 
-Memory::Memory() {
+Memory::Memory()
+{
     pid = 0;
     pmach_port = 0;
 }
 
-pid_t Memory::Attach(const std::string &procName) {
+pid_t Memory::Attach(const std::string &procName)
+{
     Close();
     PidFromName(procName.c_str());
     if (pid) {
@@ -34,11 +37,13 @@ pid_t Memory::Attach(const std::string &procName) {
     return pid;
 }
 
-void Memory::Detach() {
+void Memory::Detach()
+{
     Close();
 }
 
-kern_return_t Memory::Read(uintptr_t address, size_t size, void *buffer) {
+kern_return_t Memory::Read(uintptr_t address, size_t size, void *buffer)
+{
     assert(size != 0 || address != 0);
     
     vm_size_t data_cnt = size;
@@ -51,7 +56,8 @@ kern_return_t Memory::Read(uintptr_t address, size_t size, void *buffer) {
     return kret;
 }
 
-kern_return_t Memory::Write(uintptr_t address, size_t size, void *buffer) {
+kern_return_t Memory::Write(uintptr_t address, size_t size, void *buffer)
+{
     if (address == 0 || size == 0)
         return KERN_INVALID_ARGUMENT;
     
@@ -76,7 +82,8 @@ kern_return_t Memory::Write(uintptr_t address, size_t size, void *buffer) {
     return kret;
 }
 
-kern_return_t Memory::Protect(uintptr_t address, size_t size, vm_prot_t protection, vm_prot_t *backup) {
+kern_return_t Memory::Protect(uintptr_t address, size_t size, vm_prot_t protection, vm_prot_t *backup)
+{
     if (backup != nullptr) {
         for (auto it = segments.begin(); it != segments.end(); ++it) {
             if (it->address <= address && address <= (it->address + it->size)) {
@@ -93,7 +100,8 @@ kern_return_t Memory::Protect(uintptr_t address, size_t size, vm_prot_t protecti
     return kret;
 }
 
-uintptr_t Memory::Allocate(size_t size, vm_prot_t prot, uintptr_t BaseAddr) {
+uintptr_t Memory::Allocate(size_t size, vm_prot_t prot, uintptr_t BaseAddr)
+{
     kern_return_t kret = KERN_SUCCESS;
     boolean_t anywhere;
     unsigned char *address;
@@ -118,7 +126,8 @@ uintptr_t Memory::Allocate(size_t size, vm_prot_t prot, uintptr_t BaseAddr) {
     return (uintptr_t) address;
 }
 
-kern_return_t Memory::Free(uintptr_t address, size_t size) {
+kern_return_t Memory::Free(uintptr_t address, size_t size)
+{
     kern_return_t kret = vm_deallocate(pmach_port, vm_address_t(address), size);
     if (kret)
         MACH_CHECK_ERROR(kret)
@@ -127,7 +136,8 @@ kern_return_t Memory::Free(uintptr_t address, size_t size) {
 
 #define kMaxStringLength 8192
 
-std::string Memory::ReadString(uintptr_t address) {
+std::string Memory::ReadString(uintptr_t address)
+{
     std::string result;
     for (size_t i = 0; i < kMaxStringLength; i++) {
         char c = Read<unsigned char>(address + i);
@@ -139,7 +149,8 @@ std::string Memory::ReadString(uintptr_t address) {
     return result;
 }
 
-int Memory::Open() {
+int Memory::Open()
+{
     kern_return_t kret = task_for_pid(mach_task_self(), pid, &pmach_port);
     if (kret != KERN_SUCCESS) {
 #ifndef NDEBUG
@@ -151,12 +162,14 @@ int Memory::Open() {
     return 1;
 }
 
-void Memory::Close() {
+void Memory::Close()
+{
     pid = 0;
     pmach_port = 0;
 }
 
-void Memory::QueryRegions() {
+void Memory::QueryRegions()
+{
     mach_vm_address_t address = 0x0;
     mach_vm_size_t size;
     vm_region_basic_info_data_64_t info;
@@ -175,7 +188,8 @@ void Memory::QueryRegions() {
     }
 }
 
-void Memory::PidFromName(const char *procName) {
+void Memory::PidFromName(const char *procName)
+{
     pid = 0;
     kinfo_proc *procList;
     size_t procCount;
@@ -190,7 +204,8 @@ void Memory::PidFromName(const char *procName) {
     free(procList);
 }
 
-int Memory::GetProcessList(kinfo_proc **procList, size_t *procCount) {
+int Memory::GetProcessList(kinfo_proc **procList, size_t *procCount)
+{
     int err;
     kinfo_proc *result;
     int done;

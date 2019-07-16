@@ -1,25 +1,30 @@
 #include "code.h"
+#include "memory.h"
 #include <unistd.h>
 #include <array>
 #include <QDebug>
 
 #define STACK_SIZE 65536
 
-Code::Code(Memory &memory) : memory(memory) {
+Code::Code(Memory *memory) : memory(memory)
+{
     unsigned int page = 4;
     code = new unsigned char[4096 * page];
     length = 0;
 }
 
-Code::~Code() {
+Code::~Code()
+{
     delete[] code;
 }
 
-void Code::asm_init_codeInject() {
+void Code::asm_init_codeInject()
+{
     length = 0;
 }
 
-void Code::asm_init_newThread() {
+void Code::asm_init_newThread()
+{
     length = 23;                            //check the flag && set flag
     asm_mov_dword_ptr_exx(0x0, Reg::EAX);   //back up registers
     asm_mov_dword_ptr_exx(0x0, Reg::EBX);
@@ -33,33 +38,39 @@ void Code::asm_init_newThread() {
     asm_mov_exx(Reg::ESP, 0x0);//length = 80
 }
 
-void Code::asm_add_byte(unsigned char value) {
+void Code::asm_add_byte(unsigned char value)
+{
     code[length] = value;
     length += 1;
 }
 
-void Code::asm_add_word(unsigned short value) {
+void Code::asm_add_word(unsigned short value)
+{
     (unsigned short &) code[length] = value;
     length += 2;
 }
 
-void Code::asm_add_dword(unsigned int value) {
+void Code::asm_add_dword(unsigned int value)
+{
     (unsigned int &) code[length] = value;
     length += 4;
 }
 
-void Code::asm_push(int value) {
+void Code::asm_push(int value)
+{
     asm_add_byte((unsigned char) (0x68));
     asm_add_dword(value);
 }
 
-void Code::asm_mov_exx(Reg reg, int value) {
+void Code::asm_mov_exx(Reg reg, int value)
+{
     unsigned char mov_exx[] = {0xB8, 0xBB, 0xB9, 0xBA, 0xBE, 0xBF, 0xBD, 0xBC};
     asm_add_byte(mov_exx[static_cast<unsigned int>(reg)]);
     asm_add_dword(value);
 }
 
-void Code::asm_mov_dword_ptr_exx_add(Reg reg, int offset, int value) {
+void Code::asm_mov_dword_ptr_exx_add(Reg reg, int offset, int value)
+{
     unsigned short move_dword_ptr_exx_add[] = {0x40C7, 0xC347, 0x41C7, 0x42C7, 0x46C7, 0x47C7, 0x45C7, 0x44C7};
     asm_add_word(move_dword_ptr_exx_add[static_cast<unsigned int>(reg)]);
     if (reg == Reg::ESP)
@@ -68,7 +79,8 @@ void Code::asm_mov_dword_ptr_exx_add(Reg reg, int offset, int value) {
     asm_add_dword(value);
 }
 
-void Code::asm_add_exx(Reg reg, int value) {
+void Code::asm_add_exx(Reg reg, int value)
+{
     unsigned char add_exx[] = {0x05, 0xC3, 0xC1, 0xC2, 0xC6, 0xC7, 0xC5, 0xC4};
     if (reg != Reg::EAX)
         asm_add_byte((unsigned char) (0x81));
@@ -76,7 +88,8 @@ void Code::asm_add_exx(Reg reg, int value) {
     asm_add_dword(value);
 }
 
-void Code::asm_mov_exx_dword_ptr(Reg reg, int value) {
+void Code::asm_mov_exx_dword_ptr(Reg reg, int value)
+{
     unsigned char mov_exx_dword_ptr[] = {0xA1, 0x1D, 0x0D, 0x15, 0x35, 0x3D, 0x2D, 0x25};
     if (reg != Reg::EAX)
         asm_add_byte((unsigned char) (0x8B));
@@ -84,7 +97,8 @@ void Code::asm_mov_exx_dword_ptr(Reg reg, int value) {
     asm_add_dword(value);
 }
 
-void Code::asm_mov_dword_ptr_exx(int value, Reg reg) {
+void Code::asm_mov_dword_ptr_exx(int value, Reg reg)
+{
     unsigned char mov_dword_ptr_exx[] = {0xA3, 0x1D, 0x0D, 0x15, 0x35, 0x3D, 0x2D, 0x25};
     if (reg != Reg::EAX)
         asm_add_byte((unsigned char) (0x89));
@@ -92,7 +106,8 @@ void Code::asm_mov_dword_ptr_exx(int value, Reg reg) {
     asm_add_dword(value);
 }
 
-void Code::asm_mov_exx_dword_ptr_exx_add(Reg reg, int value) {
+void Code::asm_mov_exx_dword_ptr_exx_add(Reg reg, int value)
+{
     unsigned char mov_exx_dword_ptr_exx_add[] = {0x80, 0x9B, 0x89, 0x92, 0xB6, 0xBF, 0xAD, 0xA4};
     asm_add_byte((unsigned char) (0x8B));
     asm_add_byte(mov_exx_dword_ptr_exx_add[static_cast<unsigned int>(reg)]);
@@ -101,7 +116,8 @@ void Code::asm_mov_exx_dword_ptr_exx_add(Reg reg, int value) {
     asm_add_dword(value);
 }
 
-void Code::asm_mov_ptr_esp_add_exx(unsigned char offset, Reg reg) {
+void Code::asm_mov_ptr_esp_add_exx(unsigned char offset, Reg reg)
+{
     unsigned char asm_mov_ptr_esp_add_exx[] = {0x44, 0x5C, 0x4C, 0x54, 0x74, 0x7C, 0x6C, 0x64};
     asm_add_byte(0x89);
     asm_add_byte(asm_mov_ptr_esp_add_exx[static_cast<unsigned int>(reg)]);
@@ -109,24 +125,28 @@ void Code::asm_mov_ptr_esp_add_exx(unsigned char offset, Reg reg) {
     asm_add_byte(offset);
 }
 
-void Code::asm_mov_dword_ptr_esp_add(int offset, int value) {
+void Code::asm_mov_dword_ptr_esp_add(int offset, int value)
+{
     asm_add_word(0x84C7);
     asm_add_byte(0x24);
     asm_add_dword(offset);
     asm_add_dword(value);
 }
 
-void Code::asm_push_exx(Reg reg) {
+void Code::asm_push_exx(Reg reg)
+{
     unsigned char push_exx[] = {0x50, 0x53, 0x51, 0x52, 0x56, 0x57, 0x55, 0x54};
     asm_add_byte(push_exx[static_cast<unsigned int>(reg)]);
 }
 
-void Code::asm_pop_exx(Reg reg) {
+void Code::asm_pop_exx(Reg reg)
+{
     unsigned char pop_exx[] = {0x58, 0x5B, 0x59, 0x5A, 0x5E, 0x5F, 0x5D, 0x5C};
     asm_add_byte(pop_exx[static_cast<unsigned int>(reg)]);
 }
 
-void Code::asm_call(int addr) {
+void Code::asm_call(int addr)
+{
     asm_add_byte((unsigned char) (0xE8));
     asm_add_dword((unsigned int) (0x00000002));
     asm_add_word((unsigned short) (0x06EB));
@@ -134,7 +154,8 @@ void Code::asm_call(int addr) {
     asm_add_byte((unsigned char) (0xC3));
 }
 
-void Code::asm_ret() {
+void Code::asm_ret()
+{
     asm_mov_exx_dword_ptr(Reg::EAX, 0x0);       //restore the registers
     asm_mov_exx_dword_ptr(Reg::EBX, 0x0);
     asm_mov_exx_dword_ptr(Reg::ECX, 0x0);
@@ -160,8 +181,8 @@ void Code::asm_ret() {
 }
 
 // void Code::asm_code_inject() {
-//     mach_vm_address_t remoteStack = _memory.Allocate(STACK_SIZE, VM_PROT_READ | VM_PROT_WRITE);
-//     mach_vm_address_t remoteCode = _memory.Allocate(length, VM_PROT_ALL);
+//     mach_vm_address_t remoteStack = _memory->Allocate(STACK_SIZE, VM_PROT_READ | VM_PROT_WRITE);
+//     mach_vm_address_t remoteCode = _memory->Allocate(length, VM_PROT_ALL);
 //     x86_thread_state32_t remoteThreadState32;
 //     thread_act_t remoteThread;
 //     mach_msg_type_number_t remoteThreadStateCount = x86_THREAD_STATE32_COUNT;
@@ -171,7 +192,7 @@ void Code::asm_ret() {
 //
 //     vm_write(_core._pmach_port, remoteCode, vm_offset_t(code), length);
 //     vm_protect(_core._pmach_port, remoteCode, length, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
-//     // _memory.Write(remoteCode, length, code);
+//     // _memory->Write(remoteCode, length, code);
 //
 //     memset(&remoteThreadState32, '\0', sizeof(remoteThreadState32));
 //     remoteStack += (STACK_SIZE / 2); // this is the real stack
@@ -205,19 +226,20 @@ void Code::asm_ret() {
 //             kret = thread_terminate(remoteThread);
 //             if (kret != KERN_SUCCESS)
 //                 MACH_CHECK_ERROR(kret)
-//             _memory.Free(remoteStack, STACK_SIZE);
-//             _memory.Free(remoteCode, length);
+//             _memory->Free(remoteStack, STACK_SIZE);
+//             _memory->Free(remoteCode, length);
 //             return;
 //         } else usleep(10000);
 //     }
 // }
-void Code::asm_code_inject(bool on, uint32_t address, size_t original_size) {
+void Code::asm_code_inject(bool on, uint32_t address, size_t original_size)
+{
     assert(original_size >= 5);
     
     uint32_t injected_code = 0;
     const int code_size = length + original_size + 5;
     if (on) {
-        injected_code = (uint32_t) memory.Allocate(code_size, VM_PROT_ALL);
+        injected_code = (uint32_t) memory->Allocate(code_size, VM_PROT_ALL);
 
 #ifndef NDEBUG
         qDebug() << injected_code;
@@ -233,7 +255,7 @@ void Code::asm_code_inject(bool on, uint32_t address, size_t original_size) {
             memcpy(&ar1[1], &offset, 4);
             //the original code
             auto ar2 = new unsigned char[original_size];
-            memory.Read(address, original_size, ar2);
+            memory->Read(address, original_size, ar2);
             //code to inject
             auto ar3 = new unsigned char[code_size];
             memcpy(ar3, &code[0], length);
@@ -241,33 +263,34 @@ void Code::asm_code_inject(bool on, uint32_t address, size_t original_size) {
             ar3[code_size - 5] = 0xE9;
             memcpy(&ar3[code_size - 4], &offset2, 4);
             
-            memory.Write(injected_code, code_size, ar3);
-            memory.Write(address, original_size, ar1);
+            memory->Write(injected_code, code_size, ar3);
+            memory->Write(address, original_size, ar1);
             delete[] ar1;
             delete[] ar2;
             delete[] ar3;
         }
-    } else if (memory.Read<unsigned char>(address) == 0xE9) {
-        injected_code = memory.Read<uint32_t>(address + 1) + address + 5;
+    } else if (memory->Read<unsigned char>(address) == 0xE9) {
+        injected_code = memory->Read<uint32_t>(address + 1) + address + 5;
         auto ar1 = new unsigned char[original_size];
-        memory.Read(injected_code + length, original_size, ar1);
-        memory.Write(address, original_size, ar1);
-        memory.Free(injected_code, code_size);
+        memory->Read(injected_code + length, original_size, ar1);
+        memory->Write(address, original_size, ar1);
+        memory->Free(injected_code, code_size);
         delete[] ar1;
     }
 }
 
-void Code::asm_create_thread() {
+void Code::asm_create_thread()
+{
     int addr = 0x26C710; //0x2E0FE;
     for (int i = 0; i < 100; i++) {
-        if (memory.Read<unsigned char>(addr) == 0xE9)
+        if (memory->Read<unsigned char>(addr) == 0xE9)
             usleep(10000);                          //avoid conflict
     }
-    uint32_t remoteStack = memory.Allocate(STACK_SIZE, VM_PROT_READ | VM_PROT_WRITE);
-    uint32_t remoteCode = memory.Allocate(length, VM_PROT_ALL);
-    uint32_t ThreadState = memory.Allocate(40, VM_PROT_READ | VM_PROT_WRITE);
-    memory.Write<int>(0x0, ThreadState);
-    memory.Write<int>(0x0, ThreadState + 4);
+    uint32_t remoteStack = memory->Allocate(STACK_SIZE, VM_PROT_READ | VM_PROT_WRITE);
+    uint32_t remoteCode = memory->Allocate(length, VM_PROT_ALL);
+    uint32_t ThreadState = memory->Allocate(40, VM_PROT_READ | VM_PROT_WRITE);
+    memory->Write<int>(0x0, ThreadState);
+    memory->Write<int>(0x0, ThreadState + 4);
 
 #ifndef NDEBUG
     qDebug() << hex << remoteCode;
@@ -300,28 +323,29 @@ void Code::asm_create_thread() {
     offset = remoteCode - addr - 5;
     memcpy(&ar3[1], &offset, 4);
     
-    memory.Write(remoteCode, length, code);    //write code
-    memory.Protect(remoteCode, length, VM_PROT_READ | VM_PROT_EXECUTE);
-    memory.Write(ar3, addr);                //replace the original code
+    memory->Write(remoteCode, length, code);    //write code
+    memory->Protect(remoteCode, length, VM_PROT_READ | VM_PROT_EXECUTE);
+    memory->Write(ar3, addr);                //replace the original code
     
     for (;;) {
         int temp;
-        if (memory.Read(0x35EE64, 4, &temp) != KERN_SUCCESS)
+        if (memory->Read(0x35EE64, 4, &temp) != KERN_SUCCESS)
             break;
-        if (memory.Read<int>(ThreadState + 4) == 1) {  //check flag(2)
+        if (memory->Read<int>(ThreadState + 4) == 1) {  //check flag(2)
             std::array<unsigned char, 6> ar4 = {0x8B, 0x81, 0x88, 0x00, 0x00, 0x00};//, 0x00, 0x00, 0x00};
-            memory.Write(ar4, addr);        //restore the original code
+            memory->Write(ar4, addr);        //restore the original code
             usleep(10000);
-            memory.Free(ThreadState, 40);      //free the allocated regions
-            memory.Free(remoteCode, length);
-            memory.Free(remoteStack, STACK_SIZE);
+            memory->Free(ThreadState, 40);      //free the allocated regions
+            memory->Free(remoteCode, length);
+            memory->Free(remoteStack, STACK_SIZE);
             break;
         } else
             usleep(10000);
     }
 }
 
-void Code::asm_set_plant(int row, int column, int type, bool imitater, bool iz_style) {
+void Code::asm_set_plant(int row, int column, int type, bool imitater, bool iz_style)
+{
     if (imitater && !iz_style) {
         asm_mov_dword_ptr_esp_add(0x10, type);
         type = 48;
@@ -345,7 +369,8 @@ void Code::asm_set_plant(int row, int column, int type, bool imitater, bool iz_s
     }
 }
 
-void Code::asm_set_zombie(int row, int column, int type) {
+void Code::asm_set_zombie(int row, int column, int type)
+{
     asm_mov_dword_ptr_esp_add(0xC, row);
     asm_mov_dword_ptr_esp_add(0x8, column);
     asm_mov_dword_ptr_esp_add(0x4, type);
@@ -356,7 +381,8 @@ void Code::asm_set_zombie(int row, int column, int type) {
     asm_call(0xAC672);
 }
 
-void Code::asm_spawn_zombie(int type) {
+void Code::asm_spawn_zombie(int type)
+{
     asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
     asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
     asm_mov_dword_ptr_esp_add(0x8, 0);//Spawn wave
@@ -365,7 +391,8 @@ void Code::asm_spawn_zombie(int type) {
     asm_call(0x2CEE2);
 }
 
-void Code::asm_put_ladder(int row, int column) {
+void Code::asm_put_ladder(int row, int column)
+{
     asm_mov_dword_ptr_esp_add(0x8, row);
     asm_mov_dword_ptr_esp_add(0x4, column);
     asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
@@ -374,7 +401,8 @@ void Code::asm_put_ladder(int row, int column) {
     asm_call(0x28DB2);
 }
 
-void Code::asm_put_grave(int row, int column) {
+void Code::asm_put_grave(int row, int column)
+{
     asm_mov_dword_ptr_esp_add(0x8, row);
     asm_mov_dword_ptr_esp_add(0x4, column);
     asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
@@ -385,7 +413,8 @@ void Code::asm_put_grave(int row, int column) {
     asm_call(0x208890);
 }
 
-void Code::asm_put_rake(int row, int column) {
+void Code::asm_put_rake(int row, int column)
+{
     asm_mov_dword_ptr_esp_add(0x8, row);
     asm_mov_dword_ptr_esp_add(0x4, column);
     asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
@@ -394,7 +423,8 @@ void Code::asm_put_rake(int row, int column) {
     asm_call(0x26DA6);
 }
 
-void Code::asm_put_portal(int row, int column, int type) {
+void Code::asm_put_portal(int row, int column, int type)
+{
     asm_mov_exx_dword_ptr(Reg::EAX, 0x35EE64);
     asm_mov_exx_dword_ptr_exx_add(Reg::EAX, 0x780);
     asm_add_exx(Reg::EAX, 0x110);
@@ -414,7 +444,8 @@ void Code::asm_put_portal(int row, int column, int type) {
     asm_call(0x20898C);
 }
 
-void Code::asm_put_coin(int row, int column, int type, int scene) {
+void Code::asm_put_coin(int row, int column, int type, int scene)
+{
     int x;
     int y;
     int r = row + 1;

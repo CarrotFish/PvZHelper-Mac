@@ -15,7 +15,8 @@
 
 #define APP_VER "1.3.3"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), Timer(this) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), Timer(this)
+{
     SpawnTable = new QTableWidget(this);
     PortalWindow = new Portal(this);
     TargetMapWindow = new TargetMap(this);
@@ -24,17 +25,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     PortalWindow->hide();
     TargetMapWindow->hide();
     ui->setupUi(this);
-    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
-                   Qt::WindowMinimizeButtonHint);
+    setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     setFixedSize(width(), height());
     
     ConnectWidgets();
     ConnectSlots();
-    
-    emit FindGameProc();
 }
 
-void MainWindow::ConnectWidgets() {
+void MainWindow::ConnectWidgets()
+{
     auto MenuBar = menuBar();
     auto toolMenu = MenuBar->addMenu("工具");
     auto showPAK = toolMenu->addAction("PAK解包/打包");
@@ -645,24 +644,16 @@ void MainWindow::ConnectWidgets() {
     connect(ui->ExtractPAK, &QPushButton::clicked, this, [=]() {
         QFileInfo PAKPath = ui->PakPath->text(), FolderPath = ui->FolderPath->text();
         if (!PAKPath.exists() || !PAKPath.isFile()) {
-            QMessageBox Message(QMessageBox::Information, "", "文件不存在!", QMessageBox::Ok, nullptr,
-                                Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-            // Message.button(QMessageBox::Ok)->setText("确定");
-            // Message.button(QMessageBox::Ok)->resize(100,30);
+            QMessageBox Message(QMessageBox::Information, "", "文件不存在!", QMessageBox::Ok, this,
+                                Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
             Message.exec();
             return;
         }
         if (FolderPath.isDir()) {
             QMessageBox Question(QMessageBox::Question, "", "目标文件夹已存在，是否继续？", QMessageBox::Yes | QMessageBox::No,
-                                 nullptr, Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint |
-                                          Qt::WindowCloseButtonHint);
+                                 this, Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
             Question.setDefaultButton(QMessageBox::No);
-            // Question.button(QMessageBox::Yes)->setText("是");
-            // Question.button(QMessageBox::No)->setText("否");
-            // Question.button(QMessageBox::Yes)->resize(100,30);
-            // Question.button(QMessageBox::No)->resize(100,30);
-            auto reply = Question.exec();
-            if (reply == QMessageBox::No)
+            if (Question.exec() == QMessageBox::No)
                 return;
         }
         emit ExtractPAK(PAKPath.filePath(), FolderPath.filePath());
@@ -670,24 +661,16 @@ void MainWindow::ConnectWidgets() {
     connect(ui->PackPAK, &QPushButton::clicked, this, [=]() {
         QFileInfo PAKPath = ui->PakPath->text(), FolderPath = ui->FolderPath->text();
         if (!FolderPath.exists() || !FolderPath.isDir()) {
-            QMessageBox Message(QMessageBox::Information, "", "目录不存在!", QMessageBox::Ok, nullptr,
-                                Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-            // Message.button(QMessageBox::Ok)->setText("确定");
-            // Message.button(QMessageBox::Ok)->resize(100,30);
+            QMessageBox Message(QMessageBox::Information, "", "目录不存在!", QMessageBox::Ok, this,
+                                Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
             Message.exec();
             return;
         }
         if (PAKPath.isFile()) {
             QMessageBox Question(QMessageBox::Question, "", "目标文件已存在，是否继续？", QMessageBox::Yes | QMessageBox::No,
-                                 nullptr, Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint |
-                                          Qt::WindowCloseButtonHint);
+                                 this, Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
             Question.setDefaultButton(QMessageBox::No);
-            // Question.button(QMessageBox::Yes)->setText("是");
-            // Question.button(QMessageBox::No)->setText("否");
-            // Question.button(QMessageBox::Yes)->resize(100,30);
-            // Question.button(QMessageBox::No)->resize(100,30);
-            auto reply = Question.exec();
-            if (reply == QMessageBox::No)
+            if (Question.exec() == QMessageBox::No)
                 return;
         }
         emit PackPAK(FolderPath.filePath(), PAKPath.filePath());
@@ -698,7 +681,8 @@ void MainWindow::ConnectWidgets() {
     });
 }
 
-void MainWindow::ConnectSlots() const {
+void MainWindow::ConnectSlots() const
+{
     connect(this, &MainWindow::FindGameProc, pvz, &PvZ::FindGameProc);
     connect(this, &MainWindow::GetGameStatus, pvz, &PvZ::GetGameStatus);
     
@@ -867,18 +851,17 @@ void MainWindow::ConnectSlots() const {
     connect(this, &MainWindow::SetMusic, pvz, &PvZ::SetMusic);
 }
 
-MainWindow::~MainWindow() {
+MainWindow::~MainWindow()
+{
     delete ui;
-    delete pvz;
-    delete SpawnTable;
-    delete PortalWindow;
-    delete TargetMapWindow;
 }
 
-void MainWindow::ShowHelpWindow() {
+void MainWindow::ShowHelpWindow()
+{
     auto HelpWindow = new QMessageBox(this);
     HelpWindow->setWindowTitle("使用说明");
-    HelpWindow->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
+    HelpWindow->setWindowFlags(
+            Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     QString Message = "<h3>使用说明</h3>"
                       "<p>此修改器仅适用于1.0.40版PvZ</p>"
                       "<p>打开修改器后会自动寻找游戏进程，也可点击\"状态->寻找游戏进程\"来手动寻找</p>"
@@ -889,15 +872,15 @@ void MainWindow::ShowHelpWindow() {
     HelpWindow->setTextFormat(Qt::TextFormat::RichText);
     HelpWindow->setTextInteractionFlags(Qt::TextInteractionFlag::NoTextInteraction);
     HelpWindow->addButton(QMessageBox::Ok);
-    // HelpWindow->button(QMessageBox::Ok)->setText("确定");
-    // HelpWindow->button(QMessageBox::Ok)->resize(100,30);
     HelpWindow->show();
 }
 
-void MainWindow::ShowAboutWindow() {
+void MainWindow::ShowAboutWindow()
+{
     auto AboutWindow = new QMessageBox(this);
     AboutWindow->setWindowTitle("关于");
-    AboutWindow->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
+    AboutWindow->setWindowFlags(
+            Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     QString Message = QStringLiteral("<h3>关于</h3><p>PvZ Helper v") + APP_VER + "</p>"
                       + "<p>本程序由百度贴吧@46287153制作</p>"
                         "<p><a href=\"https://tieba.baidu.com/f?kw=植物大战僵尸\">植物大战僵尸吧</a></p>"
@@ -907,21 +890,19 @@ void MainWindow::ShowAboutWindow() {
     AboutWindow->setTextFormat(Qt::TextFormat::RichText);
     AboutWindow->setTextInteractionFlags(Qt::TextInteractionFlag::LinksAccessibleByMouse);
     AboutWindow->addButton(QMessageBox::Ok);
-    // AboutWindow->button(QMessageBox::Ok)->setText("确定");
-    // AboutWindow->button(QMessageBox::Ok)->resize(100,30);
     AboutWindow->show();
 }
 
-void MainWindow::ShowAboutQtWindow() {
-    //QMessageBox::aboutQt(this, "关于Qt");
-    QApplication::aboutQt();
+void MainWindow::ShowAboutQtWindow()
+{
+    QMessageBox::aboutQt(this, "关于Qt");
 }
 
-void MainWindow::ShowSpawnHelpWindow() {
-    auto SpawnHelpWindow = new QMessageBox(this);
-    SpawnHelpWindow->setWindowTitle("出怪修改说明");
-    SpawnHelpWindow->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint |
-                                    Qt::WindowCloseButtonHint);
+void MainWindow::ShowSpawnHelpWindow()
+{
+    auto SpawnHelpWindow = new QMessageBox(QMessageBox::NoIcon, "出怪修改说明", "", QMessageBox::Ok, this,
+                                           Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
+                                           Qt::WindowMinimizeButtonHint);
     QString Message = "<h3>出怪修改说明</h3>"
                       "<p>请在选卡时或开始游戏后进行出怪修改，修改仅在本轮游戏有效<br>"
                       "\"自然出怪\"仅修改出怪种类，列表填充由游戏内部完成<br>"
@@ -937,12 +918,11 @@ void MainWindow::ShowSpawnHelpWindow() {
     SpawnHelpWindow->setTextFormat(Qt::TextFormat::RichText);
     SpawnHelpWindow->setTextInteractionFlags(Qt::TextInteractionFlag::NoTextInteraction);
     SpawnHelpWindow->addButton(QMessageBox::Ok);
-    // SpawnHelpWindow->button(QMessageBox::Ok)->setText("确定");
-    // SpawnHelpWindow->button(QMessageBox::Ok)->resize(100,30);
     SpawnHelpWindow->show();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
+void MainWindow::closeEvent(QCloseEvent *event)
+{
     if (pvz->GameOn(false) && !ui->KeepChangesOnExit->isChecked()) {
         for (int i = 0; i < ui->tabWidget->count(); i++) {
             auto Tab = ui->tabWidget->widget(i);
@@ -955,10 +935,12 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         }
         PortalWindow->RestoreChanges();
     }
-    event->accept();
+    
+    QWidget::closeEvent(event);
 }
 
-void MainWindow::GameFound(pid_t pid) {
+void MainWindow::GameFound(pid_t pid)
+{
     ui->GamePID->setText(QString::number(pid));
     emit ui->ResourceType->currentIndexChanged(ui->ResourceType->currentIndex());
     emit ui->CardID->currentIndexChanged(ui->CardID->currentIndex());
@@ -971,7 +953,8 @@ void MainWindow::GameFound(pid_t pid) {
 }
 
 void MainWindow::ShowGameStatus(int CurGameMode, int CurGameUI, int CurGameTime, int CurrentWave, int PlantsCount,
-                                int ZombiesCount, int RefreshCountdown, int HugeWaveCountdown) {
+                                int ZombiesCount, int RefreshCountdown, int HugeWaveCountdown)
+{
     ui->CurrentMode->setText(QString::number(CurGameMode));
     ui->CurrentUI->setText(QString::number(CurGameUI));
     ui->GameTime->setText(QString::number(CurGameTime));
@@ -982,7 +965,8 @@ void MainWindow::ShowGameStatus(int CurGameMode, int CurGameUI, int CurGameTime,
     ui->HugeWaveCountdown->setText(QString::number(HugeWaveCountdown));
 }
 
-void MainWindow::GameNotFound(bool alert) {
+void MainWindow::GameNotFound(bool alert)
+{
     ui->CurrentMode->clear();
     ui->CurrentUI->clear();
     ui->GameTime->clear();
@@ -995,15 +979,14 @@ void MainWindow::GameNotFound(bool alert) {
     ui->ZombieHP->clear();
     ClearSpawnTable();
     if (alert) {
-        QMessageBox Message(QMessageBox::Information, "", "找不到游戏!", QMessageBox::Ok, nullptr,
-                            Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-        // Message.button(QMessageBox::Ok)->setText("确定");
-        // Message.button(QMessageBox::Ok)->resize(100,30);
+        QMessageBox Message(QMessageBox::Information, "", "找不到游戏!", QMessageBox::Ok, this,
+                            Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
         Message.exec();
     }
 }
 
-void MainWindow::MaintainCheckedItem() {
+void MainWindow::MaintainCheckedItem()
+{
     if (pvz->GameOn()) {
         for (int i = 0; i < ui->tabWidget->count(); i++) {
             auto Tab = ui->tabWidget->widget(i);
@@ -1017,7 +1000,8 @@ void MainWindow::MaintainCheckedItem() {
     }
 }
 
-void MainWindow::RestoreCheckedItem() {
+void MainWindow::RestoreCheckedItem()
+{
     if (pvz->GameOn()) {
         for (int i = 0; i < ui->tabWidget->count(); i++) {
             auto Tab = ui->tabWidget->widget(i);
@@ -1030,7 +1014,8 @@ void MainWindow::RestoreCheckedItem() {
     }
 }
 
-void MainWindow::AutoRefreshGameStatus(bool on) {
+void MainWindow::AutoRefreshGameStatus(bool on)
+{
     if (on) {
         Timer.start(100);
     } else {
@@ -1038,56 +1023,68 @@ void MainWindow::AutoRefreshGameStatus(bool on) {
     }
 }
 
-void MainWindow::SetResourceValue(int value) {
+void MainWindow::SetResourceValue(int value)
+{
     ui->ResourceValue->setText(QString::number(value));
 }
 
-void MainWindow::EnableCost() {
+void MainWindow::EnableCost()
+{
     ui->CardCost->setDisabled(false);
     ui->label_11->setDisabled(false);
 }
 
-void MainWindow::DisableCost() {
+void MainWindow::DisableCost()
+{
     ui->CardCost->setDisabled(true);
     ui->label_11->setDisabled(true);
 }
 
-void MainWindow::EnableCooldownTime() {
+void MainWindow::EnableCooldownTime()
+{
     ui->CardCooldownTime->setDisabled(false);
     ui->label_12->setDisabled(false);
 }
 
-void MainWindow::DisableCooldownTime() {
+void MainWindow::DisableCooldownTime()
+{
     ui->CardCooldownTime->setDisabled(true);
     ui->label_12->setDisabled(true);
 }
 
-void MainWindow::ShowCardProperty(int cost, int cooldowntime) {
+void MainWindow::ShowCardProperty(int cost, int cooldowntime)
+{
     ui->CardCost->setText(QString::number(cost));
     ui->CardCooldownTime->setText(QString::number(cooldowntime));
 }
 
-void MainWindow::ShowTargetMap(const std::array<int, 54> &targetMap) {
+void MainWindow::ShowTargetMap(const std::array<int, 54> &targetMap)
+{
     TargetMapWindow->ShowTargetMap(targetMap);
 }
 
-void MainWindow::ShowPlantHP(int value) {
+void MainWindow::ShowPlantHP(int value)
+{
     ui->PlantHP->setText(QString::number(value));
 }
 
-void MainWindow::ShowPlantAttackInterval(int value) {
+void MainWindow::ShowPlantAttackInterval(int value)
+{
     ui->PlantAttackInterval->setText(QString::number(value));
 }
 
-void MainWindow::ShowProjectileDamage(int damage) {
+void MainWindow::ShowProjectileDamage(int damage)
+{
     ui->ProjectileDamage->setText(QString::number(damage));
 }
 
-void MainWindow::ShowZombieHP(int value) {
+void MainWindow::ShowZombieHP(int value)
+{
     ui->ZombieHP->setText(QString::number(value));
 }
 
-std::array<bool, 33> MainWindow::GetZombies() const {
+std::array<bool, 33> MainWindow::GetZombies() const
+{
     std::array<bool, 33> zombies = {false};
     auto SpawnType = ui->tab_7->findChildren<QCheckBox *>(QRegularExpression("SpawnType_.*"));
     int index[20] = {2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 32};
@@ -1100,7 +1097,8 @@ std::array<bool, 33> MainWindow::GetZombies() const {
     return zombies;
 }
 
-void MainWindow::UpdateSpawnTable(const std::array<int, 33> &zombies_count) {
+void MainWindow::UpdateSpawnTable(const std::array<int, 33> &zombies_count)
+{
     int zombies_type_count = 0, total_count = std::accumulate(zombies_count.begin(), zombies_count.end(), 0);
     for (size_t i = 0; i < 33; i++)
         if (zombies_count[i] > 0)
@@ -1118,8 +1116,8 @@ void MainWindow::UpdateSpawnTable(const std::array<int, 33> &zombies_count) {
     SpawnTable->setCornerButtonEnabled(false);
     SpawnTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     SpawnTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    SpawnTable->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-    //tableWidget->setWindowFlags(Qt::Dialog);
+    SpawnTable->setWindowFlags(
+            Qt::Tool | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     int row = 0;
     for (size_t i = 0; i < 33; i++) {
         if (zombies_count[i] > 0) {
@@ -1141,12 +1139,14 @@ void MainWindow::UpdateSpawnTable(const std::array<int, 33> &zombies_count) {
         SpawnTable->show();
 }
 
-void MainWindow::ClearSpawnTable() {
+void MainWindow::ClearSpawnTable()
+{
     SpawnTable->clear();
     SpawnTable->hide();
 }
 
-void MainWindow::UpdateGigaWaves(const std::array<bool, 20> &giga_waves) {
+void MainWindow::UpdateGigaWaves(const std::array<bool, 20> &giga_waves)
+{
     auto GigaWaves = ui->tab_10->findChildren<QCheckBox *>(QRegularExpression("GigaWave_.*"));
     for (auto giga_wave:GigaWaves) {
         int id = giga_wave->objectName().remove("GigaWave_").toInt();
@@ -1154,15 +1154,18 @@ void MainWindow::UpdateGigaWaves(const std::array<bool, 20> &giga_waves) {
     }
 }
 
-void MainWindow::ShowSeed(uint32_t seed) {
+void MainWindow::ShowSeed(uint32_t seed)
+{
     ui->SpawnSeed->setText(QString("%1").arg(seed, 8, 16, QLatin1Char('0')).toUpper());
 }
 
-void MainWindow::OpenUserdataFolder(const QString &DataDir) {
+void MainWindow::OpenUserdataFolder(const QString &DataDir)
+{
     QDesktopServices::openUrl(QUrl("file:" + DataDir, QUrl::TolerantMode));
 }
 
-void MainWindow::SelectPAKFile() {
+void MainWindow::SelectPAKFile()
+{
     QFileInfo PAKPath = QFileDialog::getOpenFileName(this, "选择PAK文件", "~", "PAK文件(*.pak);;所有文件(*.*)");
     if (!PAKPath.filePath().isEmpty()) {
         emit PAKFilePath(PAKPath.filePath());
@@ -1170,7 +1173,8 @@ void MainWindow::SelectPAKFile() {
     }
 }
 
-void MainWindow::SelectPAKFolder() {
+void MainWindow::SelectPAKFolder()
+{
     QFileInfo FolderPath = QFileDialog::getExistingDirectory(this, "选择文件夹", "~");
     if (!FolderPath.filePath().isEmpty()) {
         emit PAKFolderPath(FolderPath.filePath());
@@ -1178,23 +1182,24 @@ void MainWindow::SelectPAKFolder() {
     }
 }
 
-void MainWindow::UpdatePAKPath(const QString &Path) {
+void MainWindow::UpdatePAKPath(const QString &Path)
+{
     ui->PakPath->setText(Path);
 }
 
-void MainWindow::UpdateFolderPath(const QString &Path) {
+void MainWindow::UpdateFolderPath(const QString &Path)
+{
     ui->FolderPath->setText(Path);
 }
 
-void MainWindow::ExtractPAK(const QString &PAKPath, const QString &FolderPath) {
+void MainWindow::ExtractPAK(const QString &PAKPath, const QString &FolderPath)
+{
     bool extract_failed = false;
     // open file
     QFile PAKFile(PAKPath);
     if (!PAKFile.open(QIODevice::ReadOnly | QIODevice::ExistingOnly)) {
-        QMessageBox Message(QMessageBox::Warning, "", "无法读取文件：" + PAKPath, QMessageBox::Yes, nullptr,
-                            Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-        // Message.button(QMessageBox::Yes)->setText("确定");
-        // Message.button(QMessageBox::Ok)->resize(100,30);
+        QMessageBox Message(QMessageBox::Warning, "", "无法读取文件：" + PAKPath, QMessageBox::Yes, this,
+                            Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
         Message.exec();
         return;
     }
@@ -1263,14 +1268,9 @@ void MainWindow::ExtractPAK(const QString &PAKPath, const QString &FolderPath) {
                 file.close();
             } else {
                 QMessageBox Message(QMessageBox::Warning, "", "无法创建文件：" + output_file_path,
-                                    QMessageBox::Ignore | QMessageBox::Cancel, nullptr,
-                                    Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint |
-                                    Qt::WindowCloseButtonHint);
+                                    QMessageBox::Ignore | QMessageBox::Cancel, this,
+                                    Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
                 Message.setDefaultButton(QMessageBox::Cancel);
-                // Message.button(QMessageBox::Ignore)->setText("忽略");
-                // Message.button(QMessageBox::Cancel)->setText("取消");
-                // Message.button(QMessageBox::Ignore)->resize(100,30);
-                // Message.button(QMessageBox::Cancel)->resize(100,30);
                 if (Message.exec() == QMessageBox::Cancel) {
                     extract_failed = true;
                     break;
@@ -1278,14 +1278,9 @@ void MainWindow::ExtractPAK(const QString &PAKPath, const QString &FolderPath) {
             }
         } else {
             QMessageBox Message(QMessageBox::Warning, "", "无法创建目录：" + output_file_folder,
-                                QMessageBox::Ignore | QMessageBox::Cancel, nullptr,
-                                Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint |
-                                Qt::WindowCloseButtonHint);
+                                QMessageBox::Ignore | QMessageBox::Cancel, this,
+                                Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
             Message.setDefaultButton(QMessageBox::Cancel);
-            // Message.button(QMessageBox::Ignore)->setText("忽略");
-            // Message.button(QMessageBox::Cancel)->setText("取消");
-            // Message.button(QMessageBox::Ignore)->resize(100,30);
-            // Message.button(QMessageBox::Cancel)->resize(100,30);
             if (Message.exec() == QMessageBox::Cancel) {
                 extract_failed = true;
                 break;
@@ -1298,28 +1293,24 @@ void MainWindow::ExtractPAK(const QString &PAKPath, const QString &FolderPath) {
     {
         QString userPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
         QString userName = userPath.section("/", -1, -1);
-        //QString userName = FolderPath.section('/', 2, 2);
         QString cmd = FolderPath;
         cmd = "chown -R " + userName + ' ' + cmd.replace(' ', "\\ ");
         system(cmd.toStdString().data());
     }
     
     if (!extract_failed) {
-        QMessageBox Message(QMessageBox::Information, "", "解包完成!", QMessageBox::Ok, nullptr,
-                            Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-        // Message.button(QMessageBox::Ok)->setText("确定");
-        // Message.button(QMessageBox::Ok)->resize(100,30);
+        QMessageBox Message(QMessageBox::Information, "", "解包完成!", QMessageBox::Ok, this,
+                            Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
         Message.exec();
     }
 }
 
-void MainWindow::PackPAK(const QString &FolderPath, const QString &PAKPath) {
+void MainWindow::PackPAK(const QString &FolderPath, const QString &PAKPath)
+{
     QFile PAKFile(PAKPath);
     if (!PAKFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        QMessageBox Message(QMessageBox::Warning, "", "无法创建文件：" + PAKPath, QMessageBox::Ok, nullptr,
-                            Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-        // Message.button(QMessageBox::Ok)->setText("确定");
-        // Message.button(QMessageBox::Ok)->resize(100,30);
+        QMessageBox Message(QMessageBox::Warning, "", "无法创建文件：" + PAKPath, QMessageBox::Ok, this,
+                            Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
         Message.exec();
         return;
     }
@@ -1401,16 +1392,13 @@ void MainWindow::PackPAK(const QString &FolderPath, const QString &PAKPath) {
     {
         QString userPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
         QString userName = userPath.section("/", -1, -1);
-        //QString userName = PAKPath.section('/', 2, 2);
         QString cmd = PAKPath;
         cmd = "chown " + userName + ' ' + cmd.replace(' ', "\\ ");
         system(cmd.toStdString().data());
     }
     
-    QMessageBox Message(QMessageBox::Information, "", "打包完成!", QMessageBox::Ok, nullptr,
-                        Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
-    // Message.button(QMessageBox::Ok)->setText("确定");
-    // Message.button(QMessageBox::Ok)->resize(100,30);
+    QMessageBox Message(QMessageBox::Information, "", "打包完成!", QMessageBox::Ok, this,
+                        Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
     Message.exec();
     
 }

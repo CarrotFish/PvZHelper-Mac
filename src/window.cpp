@@ -5,9 +5,9 @@
 #include "list.h"
 #include <array>
 
-Portal::Portal(MainWindow *mainWindow) : ui(new Ui::PortalWindow), mainWindow(mainWindow) {
-    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
-                   Qt::WindowMinimizeButtonHint);
+Portal::Portal(MainWindow *mainWindow) : QWidget(mainWindow), ui(new Ui::PortalWindow), mainWindow(mainWindow)
+{
+    setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     ui->setupUi(this);
     
     connect(ui->SetBlackPortal, &QPushButton::clicked, this, [=]() {
@@ -28,25 +28,22 @@ Portal::Portal(MainWindow *mainWindow) : ui(new Ui::PortalWindow), mainWindow(ma
     connect(this, &Portal::LockPortal, mainWindow, &MainWindow::LockPortal);
 }
 
-Portal::~Portal() {
+Portal::~Portal()
+{
     delete ui;
 }
 
-void Portal::closeEvent(QCloseEvent *event) {
-    hide();
-    event->ignore();
-}
-
-void Portal::RestoreChanges() {
+void Portal::RestoreChanges()
+{
     if (ui->ActivePortal->isChecked())
         ui->ActivePortal->toggle();
     if (ui->LockPortal->isChecked())
         ui->LockPortal->toggle();
 }
 
-TargetMap::TargetMap(MainWindow *mainWindow) : ui(new Ui::TargetMapWindow), mainWindow(mainWindow) {
-    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
-                   Qt::WindowMinimizeButtonHint);
+TargetMap::TargetMap(MainWindow *mainWindow) : QWidget(mainWindow), ui(new Ui::TargetMapWindow), mainWindow(mainWindow)
+{
+    setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     ui->setupUi(this);
     auto targetPlants = this->findChildren<QComboBox *>(QRegularExpression("TargetPlant_.*"));
     List list;
@@ -90,19 +87,16 @@ TargetMap::TargetMap(MainWindow *mainWindow) : ui(new Ui::TargetMapWindow), main
     connect(this, &TargetMap::SetTargetMap, mainWindow, &MainWindow::SetTargetMap);
 }
 
-TargetMap::~TargetMap() {
+TargetMap::~TargetMap()
+{
     delete ui;
 }
 
-void TargetMap::ShowTargetMap(const std::array<int, 54> &targetMap) {
+void TargetMap::ShowTargetMap(const std::array<int, 54> &targetMap)
+{
     auto targetPlants = this->findChildren<QComboBox *>(QRegularExpression("TargetPlant_.*"));
     for (auto targetPlant:targetPlants) {
         int id = targetPlant->objectName().remove("TargetPlant_").toInt();
         targetPlant->setCurrentIndex(targetMap[id] + 1);
     }
-}
-
-void TargetMap::closeEvent(QCloseEvent *event) {
-    hide();
-    event->ignore();
 }

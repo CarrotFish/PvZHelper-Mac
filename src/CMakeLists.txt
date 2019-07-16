@@ -3,7 +3,7 @@ project(PvZHelper)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(-DCMAKE_PREFIX_PATH=/Applications/Qt/5.12.3/clang_64/lib/cmake)
+set(CMAKE_PREFIX_PATH /Applications/Qt/5.13.0/clang_64/lib/cmake)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)

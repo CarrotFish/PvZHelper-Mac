@@ -1,24 +1,14 @@
 #ifndef PVZ_H
 #define PVZ_H
 
-#include <QObject>
 #include <initializer_list>
-#include "memory.h"
-#include "code.h"
+#include <QObject>
 
 typedef uint8_t byte;
 
-class PvZ : public QObject {
+class PvZ : public QObject
+{
 Q_OBJECT
-
-public:
-    PvZ(class MainWindow *mainWindow);
-    
-    ~PvZ() override;
-    
-    bool GameOn(bool alert = true) {
-        return isGameOn(alert);
-    }
 
 signals:
     
@@ -376,6 +366,16 @@ public slots:
     
     void SetMusic(int type);
 
+public:
+    explicit PvZ(class MainWindow *mainWindow);
+    
+    ~PvZ() override;
+    
+    bool GameOn(bool alert = true)
+    {
+        return isGameOn(alert);
+    }
+
 private:
     template<typename T, typename... Args>
     T ReadMemory(Args... address);
@@ -424,13 +424,14 @@ private:
     void CustomizeSpawn(const std::array<bool, 33> &zombies, bool simulate, bool limit_flag, bool limit_yeti,
                         bool limit_bungee, bool limit_giga, const std::array<bool, 20> &giga_waves);
     
-    Memory memory;
-    Code code;
+    class Memory *memory;
+    
+    class Code *code;
+    
+    MainWindow *window;
     pid_t pid = 0;
     const uint32_t base = 0x35EE64;
     const std::string ProcessName = "Plants vs. Zombi";
-    
-    MainWindow *window;
 };
 
 
